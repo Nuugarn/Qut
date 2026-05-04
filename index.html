@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ใบเสนอราคา</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  :root {
+    --primary: #1a3c5e;
+    --accent: #e8a020;
+    --light: #f5f8fc;
+    --border: #c8d8e8;
+    --text: #1a2a3a;
+    --muted: #6a8aaa;
+    --danger: #e05050;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background: #e8eef5;
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--primary);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.3);
+  }
+  .topbar-title { color: #fff; font-weight: 700; font-size: 16px; }
+  .topbar-title span { color: var(--accent); }
+  .topbar-actions { display: flex; gap: 8px; align-items: center; }
+  .btn {
+    border: none; padding: 8px 16px; border-radius: 8px;
+    font-family: 'Sarabun', sans-serif; font-size: 13px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; gap: 6px;
+    transition: all .2s;
+  }
+  .btn-pdf { background: var(--accent); color: #fff; }
+  .btn-pdf:hover { background: #c88a10; }
+  .btn-reset { background: rgba(255,255,255,.15); color: #fff; }
+  .btn-reset:hover { background: rgba(255,255,255,.25); }
+  .btn:disabled { opacity: .6; cursor: not-allowed; }
+
+  /* WRAPPER */
+  .wrapper { max-width: 780px; margin: 0 auto; padding: 76px 12px 40px; }
+
+  /* CARD */
+  .card {
+    background: #fff; border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(26,60,94,.10);
+    overflow: hidden; margin-bottom: 14px;
+  }
+  .card-header {
+    background: linear-gradient(135deg, var(--primary) 0%, #2a5c8e 100%);
+    padding: 13px 18px; display: flex; align-items: center; gap: 10px;
+  }
+  .card-header-icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: rgba(255,255,255,.15);
+    display: flex; align-items: center; justify-content: center; color: var(--accent);
+  }
+  .card-header h2 { color: #fff; font-size: 14px; font-weight: 700; }
+  .card-body { padding: 16px 18px; }
+
+  /* DOC HEADER */
+  .doc-header {
+    background: #fff; border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(26,60,94,.10);
+    overflow: hidden; margin-bottom: 14px;
+  }
+  .doc-top {
+    background: linear-gradient(135deg, var(--primary) 0%, #2a5c8e 100%);
+    padding: 22px 20px 18px;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  }
+  .company-name-input {
+    font-size: 20px; font-weight: 800; color: #fff;
+    background: rgba(255,255,255,.12); border: 1.5px dashed rgba(255,255,255,.4);
+    border-radius: 8px; padding: 6px 10px; width: 100%;
+    font-family: 'Sarabun', sans-serif;
+  }
+  .company-name-input::placeholder { color: rgba(255,255,255,.45); }
+  .company-sub-input {
+    font-size: 12px; color: rgba(255,255,255,.8);
+    background: rgba(255,255,255,.08); border: 1px dashed rgba(255,255,255,.3);
+    border-radius: 6px; padding: 4px 8px; width: 100%; margin-top: 6px;
+    font-family: 'Sarabun', sans-serif;
+  }
+  .doc-badge {
+    background: var(--accent); border-radius: 10px;
+    padding: 10px 16px; text-align: center; min-width: 110px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .badge-title { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: 1px; }
+  .doc-meta { padding: 14px 18px; background: var(--light); border-bottom: 1px solid var(--border); }
+
+  /* FIELDS */
+  .field { margin-bottom: 12px; }
+  .field label {
+    display: block; font-size: 11px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px;
+  }
+  .field input, .field textarea, .field select {
+    width: 100%; padding: 9px 12px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    font-family: 'Sarabun', sans-serif; font-size: 14px; color: var(--text);
+    background: #fff; transition: border .2s, box-shadow .2s;
+    -webkit-appearance: none;
+  }
+  .field input:focus, .field textarea:focus {
+    outline: none; border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26,60,94,.1);
+  }
+  .field textarea { resize: vertical; min-height: 60px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media(max-width:480px){ .grid2 { grid-template-columns: 1fr; gap: 8px; } }
+
+  /* ITEMS TABLE */
+  .items-header {
+    display: grid;
+    grid-template-columns: 28px 1fr 64px 96px 96px 34px;
+    gap: 5px; padding: 8px 6px;
+    background: var(--primary); border-radius: 8px 8px 0 0;
+    font-size: 11px; font-weight: 700; color: rgba(255,255,255,.9);
+    text-align: center;
+  }
+  .items-header span:nth-child(2) { text-align: left; }
+  .items-wrapper { border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .items-body { min-height: 40px; }
+
+  .item-row {
+    display: grid;
+    grid-template-columns: 28px 1fr 64px 96px 96px 34px;
+    gap: 5px; padding: 6px 6px;
+    background: #fff; border-bottom: 1px solid var(--border);
+    align-items: start;
+  }
+  .item-row:last-child { border-bottom: none; }
+  .item-row:nth-child(even) { background: #f9fbfd; }
+
+  .item-num {
+    text-align: center; font-size: 12px; color: var(--muted); font-weight: 600;
+    background: var(--light); border-radius: 6px; padding: 8px 0; margin-top: 1px;
+  }
+  .item-desc {
+    border: 1.5px solid var(--border); border-radius: 6px;
+    padding: 6px 8px; font-family: 'Sarabun', sans-serif;
+    font-size: 13px; color: var(--text); width: 100%; background: #fff;
+    resize: vertical; min-height: 36px; line-height: 1.5; transition: border .2s;
+  }
+  .item-desc:focus { outline: none; border-color: var(--primary); }
+  .item-input {
+    border: 1.5px solid var(--border); border-radius: 6px;
+    padding: 6px 6px; font-family: 'Sarabun', sans-serif;
+    font-size: 13px; color: var(--text); width: 100%; background: #fff;
+    text-align: right; transition: border .2s;
+  }
+  .item-input:focus { outline: none; border-color: var(--primary); }
+  .item-total {
+    text-align: right; font-size: 13px; font-weight: 700;
+    color: var(--primary); padding: 8px 2px 0;
+  }
+  .btn-del {
+    background: none; border: none; cursor: pointer;
+    color: #ccc; transition: color .2s;
+    display: flex; align-items: center; justify-content: center;
+    padding: 4px; margin-top: 2px;
+  }
+  .btn-del:hover { color: var(--danger); }
+
+  .btn-add-row {
+    display: flex; align-items: center; gap: 8px;
+    background: none; border: 1.5px dashed var(--border);
+    border-radius: 8px; padding: 10px 14px;
+    font-family: 'Sarabun', sans-serif; font-size: 14px; color: var(--muted);
+    cursor: pointer; width: 100%; margin-top: 10px; transition: all .2s;
+  }
+  .btn-add-row:hover { border-color: var(--primary); color: var(--primary); }
+
+  /* SUMMARY */
+  .summary-box {
+    background: var(--light); border-radius: 10px;
+    border: 1.5px solid var(--border); padding: 14px 16px; margin-top: 14px;
+  }
+  .summary-total {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 18px; font-weight: 800; color: var(--primary);
+  }
+
+  /* SIGNATURE */
+  .sig-area { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width:480px){ .sig-area { grid-template-columns: 1fr; } }
+  .sig-box {
+    border: 1.5px dashed var(--border); border-radius: 10px;
+    padding: 14px 14px 10px; text-align: center;
+  }
+  .sig-label { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+  .sig-line { border-top: 1.5px solid var(--border); margin: 32px 0 8px; }
+  .sig-name-input {
+    border: none; border-bottom: 1.5px dashed var(--border);
+    font-family: 'Sarabun', sans-serif; font-size: 13px; text-align: center;
+    width: 100%; background: transparent; color: var(--text); padding: 2px 0;
+  }
+  .sig-name-input:focus { outline: none; border-bottom-color: var(--primary); }
+  .sig-date-label { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .sig-date-input {
+    border: none; border-bottom: 1.5px dashed var(--border);
+    font-family: 'Sarabun', sans-serif; font-size: 13px; text-align: center;
+    width: 100%; background: transparent; color: var(--text); padding: 2px 0; margin-top: 2px;
+  }
+  .sig-date-input:focus { outline: none; border-bottom-color: var(--primary); }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: #1a2a3a; color: #fff; padding: 10px 22px; border-radius: 30px;
+    font-size: 14px; font-weight: 600; z-index: 999;
+    opacity: 0; transition: opacity .3s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+
+  /* PRINT / PDF */
+  @media print {
+    @page { size: A4; margin: 14mm 14mm 14mm 14mm; }
+    body { background: #fff !important; font-size: 12px; }
+    .topbar, .btn-add-row, .btn-del, .no-print { display: none !important; }
+    .wrapper { padding: 0 !important; max-width: 100%; }
+    .card, .doc-header { box-shadow: none; margin-bottom: 8px; page-break-inside: avoid; }
+    .item-desc, .item-input, .company-name-input, .company-sub-input,
+    .field input, .field textarea,
+    .sig-name-input, .sig-date-input {
+      border: none !important; box-shadow: none !important;
+      background: transparent !important; padding: 2px 4px !important;
+    }
+    .field input, .field textarea { border-bottom: 1px solid #bbb !important; }
+    .items-header, .doc-top, .card-header {
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-title">📄 ใบเสนอ<span>ราคา</span></div>
+  <div class="topbar-actions">
+    <button class="btn btn-reset" onclick="resetForm()" title="ล้างข้อมูลทั้งหมด">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+      ล้างข้อมูล
+    </button>
+    <button class="btn btn-pdf" id="pdfBtn" onclick="exportPDF()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Export PDF
+    </button>
+  </div>
+</div>
+
+<div class="wrapper" id="form-area">
+
+  <!-- DOC HEADER -->
+  <div class="doc-header">
+    <div class="doc-top">
+      <div style="flex:1">
+        <input class="company-name-input" id="companyName" type="text" placeholder="ชื่อบริษัท / ร้านค้า">
+        <input class="company-sub-input" id="companySub" type="text" placeholder="ที่อยู่ / เบอร์โทร / อีเมล">
+      </div>
+      <div class="doc-badge"><div class="badge-title">ใบเสนอราคา</div></div>
+    </div>
+    <div class="doc-meta">
+      <div class="field" style="margin-bottom:0">
+        <label>วันที่ออก</label>
+        <input type="date" id="issueDate" style="max-width:200px">
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOMER -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <h2>ข้อมูลลูกค้า</h2>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <label>ชื่อลูกค้า / บริษัท</label>
+        <input type="text" id="custName" placeholder="กรอกชื่อลูกค้าหรือบริษัท">
+      </div>
+      <div class="field">
+        <label>ที่อยู่</label>
+        <textarea rows="2" id="custAddr" placeholder="ที่อยู่สำหรับออกเอกสาร"></textarea>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>เบอร์โทรศัพท์</label>
+          <input type="tel" id="custTel" placeholder="08x-xxx-xxxx">
+        </div>
+        <div class="field">
+          <label>เลขประจำตัวผู้เสียภาษี</label>
+          <input type="text" id="custTax" placeholder="0-0000-00000-00-0">
+        </div>
+      </div>
+      <div class="field">
+        <label>อีเมล</label>
+        <input type="email" id="custEmail" placeholder="email@example.com">
+      </div>
+    </div>
+  </div>
+
+  <!-- ITEMS -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      </div>
+      <h2>รายการสินค้า / บริการ</h2>
+    </div>
+    <div class="card-body" style="padding-top:12px">
+      <div class="items-wrapper">
+        <div class="items-header">
+          <span>#</span><span>รายการ</span><span>จำนวน</span><span>ราคา/หน่วย</span><span>รวม</span><span></span>
+        </div>
+        <div class="items-body" id="itemsBody"></div>
+      </div>
+      <button class="btn-add-row no-print" onclick="addRow()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        เพิ่มรายการ
+      </button>
+      <div class="summary-box">
+        <div class="summary-total">
+          <span>ยอดรวมทั้งสิ้น</span>
+          <span id="grandTotal">0.00 ฿</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TERMS -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <h2>เงื่อนไข / หมายเหตุ</h2>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <label>เงื่อนไขการชำระเงิน</label>
+        <textarea rows="3" id="payTerms" placeholder="เช่น ชำระภายใน 30 วัน / ชำระครึ่งหนึ่งก่อน ส่วนที่เหลือเมื่อส่งมอบ..."></textarea>
+      </div>
+      <div class="field">
+        <label>ข้อมูลบัญชีธนาคาร</label>
+        <input type="text" id="bankInfo" placeholder="เช่น กสิกรไทย 123-4-56789-0 ชื่อบัญชี">
+      </div>
+      <div class="field">
+        <label>หมายเหตุเพิ่มเติม</label>
+        <textarea rows="3" id="notes" placeholder="หมายเหตุ เงื่อนไขพิเศษ หรือข้อมูลเพิ่มเติม..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIGNATURE -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <h2>ลายเซ็น</h2>
+    </div>
+    <div class="card-body">
+      <div class="sig-area">
+        <div class="sig-box">
+          <div class="sig-label">ผู้เสนอราคา</div>
+          <div class="sig-line"></div>
+          <input class="sig-name-input" type="text" placeholder="ชื่อ - นามสกุล">
+          <div class="sig-date-label">วันที่</div>
+          <input class="sig-date-input" type="text" placeholder="____/____/________">
+        </div>
+        <div class="sig-box">
+          <div class="sig-label">ผู้อนุมัติ / ลูกค้า</div>
+          <div class="sig-line"></div>
+          <input class="sig-name-input" type="text" placeholder="ชื่อ - นามสกุล">
+          <div class="sig-date-label">วันที่</div>
+          <input class="sig-date-input" type="text" placeholder="____/____/________">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:8px 0 4px;font-size:11px;color:var(--muted)" class="no-print">
+    กด <strong>Export PDF</strong> ด้านบน เพื่อดาวน์โหลดไฟล์ PDF
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let rowCount = 0;
+
+  /* ── FORMAT ── */
+  function fmt(n) {
+    return Number(n).toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ฿';
+  }
+
+  /* ── ROWS ── */
+  function addRow() {
+    rowCount++;
+    const id = rowCount;
+    const body = document.getElementById('itemsBody');
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.id = 'row-' + id;
+    row.innerHTML = `
+      <div class="item-num">${id}</div>
+      <textarea class="item-desc" rows="2" placeholder="รายการสินค้า/บริการ" oninput="autoResize(this); saveData()"></textarea>
+      <input class="item-input" type="number" min="0" value="1" oninput="calcRow(${id}); saveData()">
+      <input class="item-input" type="number" min="0" value="0" oninput="calcRow(${id}); saveData()">
+      <div class="item-total" id="rt-${id}">0.00 ฿</div>
+      <button class="btn-del no-print" onclick="delRow(${id})" title="ลบรายการ">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </button>
+    `;
+    body.appendChild(row);
+    calcTotal();
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+
+  function calcRow(id) {
+    const row = document.getElementById('row-' + id);
+    const inputs = row.querySelectorAll('input[type=number]');
+    const qty = parseFloat(inputs[0].value) || 0;
+    const price = parseFloat(inputs[1].value) || 0;
+    document.getElementById('rt-' + id).textContent = fmt(qty * price);
+    calcTotal();
+  }
+
+  function calcTotal() {
+    let total = 0;
+    document.querySelectorAll('.item-row').forEach(row => {
+      const inputs = row.querySelectorAll('input[type=number]');
+      total += (parseFloat(inputs[0]?.value)||0) * (parseFloat(inputs[1]?.value)||0);
+    });
+    document.getElementById('grandTotal').textContent = fmt(total);
+  }
+
+  function delRow(id) {
+    document.getElementById('row-' + id)?.remove();
+    calcTotal();
+    saveData();
+  }
+
+  /* ── SAVE / LOAD (localStorage) ── */
+  function gatherData() {
+    const rows = [];
+    document.querySelectorAll('.item-row').forEach(row => {
+      const desc = row.querySelector('.item-desc')?.value || '';
+      const inputs = row.querySelectorAll('input[type=number]');
+      rows.push({ desc, qty: inputs[0]?.value||'1', price: inputs[1]?.value||'0' });
+    });
+    return {
+      companyName: document.getElementById('companyName').value,
+      companySub:  document.getElementById('companySub').value,
+      issueDate:   document.getElementById('issueDate').value,
+      custName:    document.getElementById('custName').value,
+      custAddr:    document.getElementById('custAddr').value,
+      custTel:     document.getElementById('custTel').value,
+      custTax:     document.getElementById('custTax').value,
+      custEmail:   document.getElementById('custEmail').value,
+      payTerms:    document.getElementById('payTerms').value,
+      bankInfo:    document.getElementById('bankInfo').value,
+      notes:       document.getElementById('notes').value,
+      rows
+    };
+  }
+
+  function saveData() {
+    localStorage.setItem('quo_data', JSON.stringify(gatherData()));
+  }
+
+  function loadData() {
+    const raw = localStorage.getItem('quo_data');
+    if (!raw) return;
+    try {
+      const d = JSON.parse(raw);
+      document.getElementById('companyName').value = d.companyName || '';
+      document.getElementById('companySub').value  = d.companySub  || '';
+      document.getElementById('issueDate').value   = d.issueDate   || '';
+      document.getElementById('custName').value    = d.custName    || '';
+      document.getElementById('custAddr').value    = d.custAddr    || '';
+      document.getElementById('custTel').value     = d.custTel     || '';
+      document.getElementById('custTax').value     = d.custTax     || '';
+      document.getElementById('custEmail').value   = d.custEmail   || '';
+      document.getElementById('payTerms').value    = d.payTerms    || '';
+      document.getElementById('bankInfo').value    = d.bankInfo    || '';
+      document.getElementById('notes').value       = d.notes       || '';
+      if (d.rows && d.rows.length > 0) {
+        d.rows.forEach(r => {
+          addRow();
+          const id = rowCount;
+          const row = document.getElementById('row-' + id);
+          row.querySelector('.item-desc').value = r.desc || '';
+          const inputs = row.querySelectorAll('input[type=number]');
+          inputs[0].value = r.qty || '1';
+          inputs[1].value = r.price || '0';
+          calcRow(id);
+          autoResize(row.querySelector('.item-desc'));
+        });
+      } else {
+        addRow(); addRow(); addRow();
+      }
+    } catch(e) {
+      addRow(); addRow(); addRow();
+    }
+  }
+
+  /* ── AUTO-SAVE on any input ── */
+  document.addEventListener('input', e => {
+    if (e.target.closest('#form-area')) saveData();
+  });
+
+  /* ── RESET ── */
+  function resetForm() {
+    if (!confirm('ล้างข้อมูลทั้งหมดใช่ไหม?')) return;
+    localStorage.removeItem('quo_data');
+    document.getElementById('itemsBody').innerHTML = '';
+    rowCount = 0;
+    ['companyName','companySub','custName','custAddr','custTel',
+     'custTax','custEmail','payTerms','bankInfo','notes'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    document.getElementById('issueDate').value = new Date().toISOString().split('T')[0];
+    addRow(); addRow(); addRow();
+    showToast('ล้างข้อมูลแล้ว ✓');
+  }
+
+  /* ── EXPORT PDF (html2pdf.js) ── */
+  async function exportPDF() {
+    const btn = document.getElementById('pdfBtn');
+    btn.disabled = true;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> กำลังสร้าง...`;
+
+    // Snapshot textarea values into spans for PDF rendering
+    document.querySelectorAll('textarea, input[type=text], input[type=tel], input[type=email], input[type=date], input[type=number]').forEach(el => {
+      el.setAttribute('data-val', el.value);
+    });
+
+    const element = document.getElementById('form-area');
+    const compName = document.getElementById('companyName').value || 'ใบเสนอราคา';
+    const filename = `${compName}_${new Date().toISOString().slice(0,10)}.pdf`;
+
+    const opt = {
+      margin: [10, 10, 10, 10],
+      filename,
+      image: { type: 'jpeg', quality: 0.95 },
+      html2canvas: { scale: 2, useCORS: true, logging: false },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+
+    // Hide no-print elements
+    document.querySelectorAll('.no-print').forEach(el => el.style.display='none');
+
+    try {
+      await html2pdf().set(opt).from(element).save();
+      showToast('ดาวน์โหลด PDF เรียบร้อย ✓');
+    } catch(e) {
+      showToast('เกิดข้อผิดพลาด กรุณาลองใหม่');
+    }
+
+    document.querySelectorAll('.no-print').forEach(el => el.style.display='');
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Export PDF`;
+  }
+
+  /* ── TOAST ── */
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  /* ── INIT ── */
+  document.getElementById('issueDate').value = new Date().toISOString().split('T')[0];
+  loadData();
+</script>
+</body>
+</html>
