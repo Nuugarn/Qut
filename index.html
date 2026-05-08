@@ -9,12 +9,12 @@
 <style>
   :root {
     --primary: #1a3c5e;
-    --accent: #e8a020;
-    --light: #f5f8fc;
-    --border: #c8d8e8;
-    --text: #1a2a3a;
-    --muted: #6a8aaa;
-    --danger: #e05050;
+    --accent:  #e8a020;
+    --light:   #f5f8fc;
+    --border:  #c8d8e8;
+    --text:    #1a2a3a;
+    --muted:   #6a8aaa;
+    --danger:  #e05050;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -43,7 +43,7 @@
     cursor: pointer; display: flex; align-items: center; gap: 6px;
     transition: all .2s;
   }
-  .btn-pdf { background: var(--accent); color: #fff; }
+  .btn-pdf   { background: var(--accent); color: #fff; }
   .btn-pdf:hover { background: #c88a10; }
   .btn-reset { background: rgba(255,255,255,.15); color: #fff; }
   .btn-reset:hover { background: rgba(255,255,255,.25); }
@@ -94,13 +94,22 @@
     border-radius: 6px; padding: 4px 8px; width: 100%; margin-top: 6px;
     font-family: 'Sarabun', sans-serif;
   }
+
+  /* badge — วันที่ใต้ชื่อเอกสาร */
   .doc-badge {
     background: var(--accent); border-radius: 10px;
-    padding: 10px 16px; text-align: center; min-width: 110px; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
+    padding: 10px 14px; text-align: center; min-width: 120px; flex-shrink: 0;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
   }
-  .badge-title { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: 1px; }
-  .doc-meta { padding: 14px 18px; background: var(--light); border-bottom: 1px solid var(--border); }
+  .badge-title { font-size: 17px; font-weight: 800; color: #fff; letter-spacing: 1px; white-space: nowrap; }
+  .badge-date-input {
+    background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.45);
+    border-radius: 6px; padding: 3px 6px;
+    font-family: 'Sarabun', sans-serif; font-size: 12px; color: #fff;
+    text-align: center; width: 100%; -webkit-appearance: none;
+  }
+  .badge-date-input::-webkit-calendar-picker-indicator { filter: invert(1); opacity: .7; cursor: pointer; }
+  .badge-date-input:focus { outline: none; border-color: rgba(255,255,255,.9); }
 
   /* FIELDS */
   .field { margin-bottom: 12px; }
@@ -120,9 +129,11 @@
     box-shadow: 0 0 0 3px rgba(26,60,94,.1);
   }
   .field textarea { resize: vertical; min-height: 60px; }
+
+  /* GRIDS */
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-  @media(max-width:480px){ .grid2, .grid3 { grid-template-columns: 1fr; gap: 8px; } }
+  @media(max-width:540px) { .grid2, .grid3 { grid-template-columns: 1fr; gap: 8px; } }
 
   /* ITEMS TABLE */
   .items-header {
@@ -151,13 +162,27 @@
     text-align: center; font-size: 12px; color: var(--muted); font-weight: 600;
     background: var(--light); border-radius: 6px; padding: 8px 0; margin-top: 1px;
   }
-  .item-desc {
+
+  /* ช่องรายการ: ชื่อ + รายละเอียด */
+  .item-desc-wrap { display: flex; flex-direction: column; gap: 3px; }
+  .item-name {
     border: 1.5px solid var(--border); border-radius: 6px;
-    padding: 6px 8px; font-family: 'Sarabun', sans-serif;
-    font-size: 13px; color: var(--text); width: 100%; background: #fff;
-    resize: vertical; min-height: 36px; line-height: 1.5; transition: border .2s;
+    padding: 5px 8px; font-family: 'Sarabun', sans-serif;
+    font-size: 13px; font-weight: 600; color: var(--text);
+    width: 100%; background: #fff; transition: border .2s;
   }
-  .item-desc:focus { outline: none; border-color: var(--primary); }
+  .item-name::placeholder { font-weight: 400; color: #aab8c8; }
+  .item-name:focus { outline: none; border-color: var(--primary); }
+  .item-detail {
+    border: 1.5px solid var(--border); border-radius: 6px;
+    padding: 4px 8px; font-family: 'Sarabun', sans-serif;
+    font-size: 12px; color: var(--muted); width: 100%; background: #fafcff;
+    resize: none; line-height: 1.5; transition: border .2s;
+    overflow: hidden; min-height: 26px;
+  }
+  .item-detail::placeholder { color: #bbc8d8; font-style: italic; }
+  .item-detail:focus { outline: none; border-color: var(--primary); background: #fff; color: var(--text); }
+
   .item-input {
     border: 1.5px solid var(--border); border-radius: 6px;
     padding: 6px 6px; font-family: 'Sarabun', sans-serif;
@@ -186,36 +211,47 @@
   }
   .btn-add-row:hover { border-color: var(--primary); color: var(--primary); }
 
-  /* SUMMARY */
+  /* SUMMARY + SIGNATURE วางข้างกัน */
+  .bottom-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 14px; margin-top: 14px; align-items: end;
+  }
+  @media(max-width:520px) { .bottom-row { grid-template-columns: 1fr; } }
+
   .summary-box {
     background: var(--light); border-radius: 10px;
-    border: 1.5px solid var(--border); padding: 14px 16px; margin-top: 14px;
+    border: 1.5px solid var(--border); padding: 14px 16px;
   }
   .summary-total {
     display: flex; justify-content: space-between; align-items: center;
     font-size: 18px; font-weight: 800; color: var(--primary);
   }
 
-  /* SIGNATURE */
-  .sig-area { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media(max-width:480px){ .sig-area { grid-template-columns: 1fr; } }
-  .sig-box {
-    border: 1.5px dashed var(--border); border-radius: 10px;
-    padding: 14px 14px 10px; text-align: center;
+  /* ลายเซ็น inline */
+  .sig-inline {
+    background: #fff; border-radius: 10px;
+    border: 1.5px solid var(--border); padding: 12px 14px;
   }
-  .sig-label { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
-  .sig-line { border-top: 1.5px solid var(--border); margin: 32px 0 8px; }
+  .sig-inline-title {
+    font-size: 10px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .5px;
+    text-align: center; margin-bottom: 8px;
+  }
+  .sig-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .sig-col { text-align: center; }
+  .sig-col-label { font-size: 10px; color: var(--muted); font-weight: 600; margin-bottom: 3px; }
+  .sig-space { height: 30px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
   .sig-name-input {
     border: none; border-bottom: 1.5px dashed var(--border);
-    font-family: 'Sarabun', sans-serif; font-size: 13px; text-align: center;
+    font-family: 'Sarabun', sans-serif; font-size: 12px; text-align: center;
     width: 100%; background: transparent; color: var(--text); padding: 2px 0;
   }
   .sig-name-input:focus { outline: none; border-bottom-color: var(--primary); }
-  .sig-date-label { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .sig-date-label { font-size: 10px; color: var(--muted); margin-top: 4px; }
   .sig-date-input {
-    border: none; border-bottom: 1.5px dashed var(--border);
-    font-family: 'Sarabun', sans-serif; font-size: 13px; text-align: center;
-    width: 100%; background: transparent; color: var(--text); padding: 2px 0; margin-top: 2px;
+    border: none; border-bottom: 1px dashed var(--border);
+    font-family: 'Sarabun', sans-serif; font-size: 11px; text-align: center;
+    width: 100%; background: transparent; color: var(--text); padding: 1px 0; margin-top: 2px;
   }
   .sig-date-input:focus { outline: none; border-bottom-color: var(--primary); }
 
@@ -230,21 +266,26 @@
 
   /* PRINT / PDF */
   @media print {
-    @page { size: A4; margin: 14mm 14mm 14mm 14mm; }
+    @page { size: A4; margin: 12mm 12mm 12mm 12mm; }
     body { background: #fff !important; font-size: 12px; }
     .topbar, .btn-add-row, .btn-del, .no-print { display: none !important; }
     .wrapper { padding: 0 !important; max-width: 100%; }
     .card, .doc-header { box-shadow: none; margin-bottom: 8px; page-break-inside: avoid; }
-    .item-desc, .item-input, .company-name-input, .company-sub-input,
+    .item-name, .item-detail, .item-input,
+    .company-name-input, .company-sub-input, .badge-date-input,
     .field input, .field textarea,
     .sig-name-input, .sig-date-input {
       border: none !important; box-shadow: none !important;
       background: transparent !important; padding: 2px 4px !important;
     }
-    .field input, .field textarea { border-bottom: 1px solid #bbb !important; }
+    .badge-date-input { color: #fff !important; }
+    .field input { border-bottom: 1px solid #bbb !important; }
+    .item-name   { border-bottom: 1px solid #ddd !important; }
+    .item-detail { color: #555 !important; }
     .items-header, .doc-top, .card-header {
       -webkit-print-color-adjust: exact; print-color-adjust: exact;
     }
+    .bottom-row { page-break-inside: avoid; break-inside: avoid; }
   }
 </style>
 </head>
@@ -254,7 +295,7 @@
 <div class="topbar">
   <div class="topbar-title">📄 ใบเสนอ<span>ราคา</span></div>
   <div class="topbar-actions">
-    <button class="btn btn-reset" onclick="resetForm()" title="ล้างข้อมูลทั้งหมด">
+    <button class="btn btn-reset" onclick="resetForm()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
       ล้างข้อมูล
     </button>
@@ -267,24 +308,22 @@
 
 <div class="wrapper" id="form-area">
 
-  <!-- DOC HEADER -->
+  <!-- ① DOC HEADER -->
   <div class="doc-header">
     <div class="doc-top">
       <div style="flex:1">
         <input class="company-name-input" id="companyName" type="text" placeholder="ชื่อบริษัท / ร้านค้า">
-        <input class="company-sub-input" id="companySub" type="text" placeholder="ที่อยู่ / เบอร์โทร / อีเมล">
+        <input class="company-sub-input"  id="companySub"  type="text" placeholder="ที่อยู่ / เบอร์โทร / อีเมล">
       </div>
-      <div class="doc-badge"><div class="badge-title">ใบเสนอราคา</div></div>
-    </div>
-    <div class="doc-meta">
-      <div class="field" style="margin-bottom:0">
-        <label>วันที่ออก</label>
-        <input type="date" id="issueDate" style="max-width:200px">
+      <!-- วันที่อยู่ใต้ "ใบเสนอราคา" ในกล่องสีส้ม -->
+      <div class="doc-badge">
+        <div class="badge-title">ใบเสนอราคา</div>
+        <input type="date" id="issueDate" class="badge-date-input">
       </div>
     </div>
   </div>
 
-  <!-- CUSTOMER -->
+  <!-- ② ข้อมูลลูกค้า 2 แถว -->
   <div class="card">
     <div class="card-header">
       <div class="card-header-icon">
@@ -293,32 +332,36 @@
       <h2>ข้อมูลลูกค้า</h2>
     </div>
     <div class="card-body">
-      <div class="field">
-        <label>ชื่อลูกค้า / บริษัท</label>
-        <input type="text" id="custName" placeholder="กรอกชื่อลูกค้าหรือบริษัท">
+      <!-- แถว 1: ชื่อ | ที่อยู่ -->
+      <div class="grid2" style="margin-bottom:10px">
+        <div class="field" style="margin-bottom:0">
+          <label>ชื่อลูกค้า / บริษัท</label>
+          <input type="text" id="custName" placeholder="กรอกชื่อลูกค้าหรือบริษัท">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>ที่อยู่</label>
+          <input type="text" id="custAddr" placeholder="ที่อยู่สำหรับออกเอกสาร">
+        </div>
       </div>
-      <div class="field">
-        <label>ที่อยู่</label>
-        <textarea rows="2" id="custAddr" placeholder="ที่อยู่สำหรับออกเอกสาร"></textarea>
-      </div>
-      <div class="grid2">
-        <div class="field">
+      <!-- แถว 2: เบอร์ | เลขภาษี | อีเมล -->
+      <div class="grid3" style="margin-bottom:0">
+        <div class="field" style="margin-bottom:0">
           <label>เบอร์โทรศัพท์</label>
           <input type="tel" id="custTel" placeholder="08x-xxx-xxxx">
         </div>
-        <div class="field">
-          <label>เลขประจำตัวผู้เสียภาษี</label>
+        <div class="field" style="margin-bottom:0">
+          <label>เลขผู้เสียภาษี</label>
           <input type="text" id="custTax" placeholder="0-0000-00000-00-0">
         </div>
-      </div>
-      <div class="field">
-        <label>อีเมล</label>
-        <input type="email" id="custEmail" placeholder="email@example.com">
+        <div class="field" style="margin-bottom:0">
+          <label>อีเมล</label>
+          <input type="email" id="custEmail" placeholder="email@example.com">
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ITEMS -->
+  <!-- ③ รายการสินค้า -->
   <div class="card">
     <div class="card-header">
       <div class="card-header-icon">
@@ -329,7 +372,12 @@
     <div class="card-body" style="padding-top:12px">
       <div class="items-wrapper">
         <div class="items-header">
-          <span>#</span><span>รายการ</span><span>จำนวน</span><span>ราคา/หน่วย</span><span>รวม</span><span></span>
+          <span>#</span>
+          <span>รายการ / รายละเอียด</span>
+          <span>จำนวน</span>
+          <span>ราคา/หน่วย</span>
+          <span>รวม</span>
+          <span></span>
         </div>
         <div class="items-body" id="itemsBody"></div>
       </div>
@@ -337,16 +385,39 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         เพิ่มรายการ
       </button>
-      <div class="summary-box">
-        <div class="summary-total">
-          <span>ยอดรวมทั้งสิ้น</span>
-          <span id="grandTotal">0.00 ฿</span>
+
+      <!-- ยอดรวม + ลายเซ็น วางข้างกัน -->
+      <div class="bottom-row">
+        <div class="summary-box">
+          <div class="summary-total">
+            <span>ยอดรวมทั้งสิ้น</span>
+            <span id="grandTotal">0.00 ฿</span>
+          </div>
+        </div>
+        <div class="sig-inline">
+          <div class="sig-inline-title">ลายเซ็นผู้อนุมัติ</div>
+          <div class="sig-cols">
+            <div class="sig-col">
+              <div class="sig-col-label">ผู้เสนอราคา</div>
+              <div class="sig-space"></div>
+              <input class="sig-name-input" id="sigSeller" type="text" placeholder="ชื่อ - นามสกุล">
+              <div class="sig-date-label">วันที่</div>
+              <input class="sig-date-input" id="sigSellerDate" type="text" placeholder="วว/ดด/ปปปป">
+            </div>
+            <div class="sig-col">
+              <div class="sig-col-label">ผู้อนุมัติ / ลูกค้า</div>
+              <div class="sig-space"></div>
+              <input class="sig-name-input" id="sigBuyer" type="text" placeholder="ชื่อ - นามสกุล">
+              <div class="sig-date-label">วันที่</div>
+              <input class="sig-date-input" id="sigBuyerDate" type="text" placeholder="วว/ดด/ปปปป">
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- TERMS -->
+  <!-- ④ หมายเหตุ: 3 ช่องในบรรทัดเดียว -->
   <div class="card">
     <div class="card-header">
       <div class="card-header-icon">
@@ -372,34 +443,6 @@
     </div>
   </div>
 
-  <!-- SIGNATURE -->
-  <div class="card">
-    <div class="card-header">
-      <div class="card-header-icon">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      </div>
-      <h2>ลายเซ็น</h2>
-    </div>
-    <div class="card-body">
-      <div class="sig-area">
-        <div class="sig-box">
-          <div class="sig-label">ผู้เสนอราคา</div>
-          <div class="sig-line"></div>
-          <input class="sig-name-input" type="text" placeholder="ชื่อ - นามสกุล">
-          <div class="sig-date-label">วันที่</div>
-          <input class="sig-date-input" type="text" placeholder="____/____/________">
-        </div>
-        <div class="sig-box">
-          <div class="sig-label">ผู้อนุมัติ / ลูกค้า</div>
-          <div class="sig-line"></div>
-          <input class="sig-name-input" type="text" placeholder="ชื่อ - นามสกุล">
-          <div class="sig-date-label">วันที่</div>
-          <input class="sig-date-input" type="text" placeholder="____/____/________">
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div style="text-align:center;padding:8px 0 4px;font-size:11px;color:var(--muted)" class="no-print">
     กด <strong>Export PDF</strong> ด้านบน เพื่อดาวน์โหลดไฟล์ PDF
   </div>
@@ -410,31 +453,8 @@
 <script>
   let rowCount = 0;
 
-  /* ── FORMAT ── */
   function fmt(n) {
     return Number(n).toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ฿';
-  }
-
-  /* ── ROWS ── */
-  function addRow() {
-    rowCount++;
-    const id = rowCount;
-    const body = document.getElementById('itemsBody');
-    const row = document.createElement('div');
-    row.className = 'item-row';
-    row.id = 'row-' + id;
-    row.innerHTML = `
-      <div class="item-num">${id}</div>
-      <textarea class="item-desc" rows="2" placeholder="รายการสินค้า/บริการ" oninput="autoResize(this); saveData()"></textarea>
-      <input class="item-input" type="number" min="0" value="1" oninput="calcRow(${id}); saveData()">
-      <input class="item-input" type="number" min="0" value="0" oninput="calcRow(${id}); saveData()">
-      <div class="item-total" id="rt-${id}">0.00 ฿</div>
-      <button class="btn-del no-print" onclick="delRow(${id})" title="ลบรายการ">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-      </button>
-    `;
-    body.appendChild(row);
-    calcTotal();
   }
 
   function autoResize(el) {
@@ -442,11 +462,38 @@
     el.style.height = el.scrollHeight + 'px';
   }
 
+  function addRow() {
+    rowCount++;
+    const id   = rowCount;
+    const body = document.getElementById('itemsBody');
+    const row  = document.createElement('div');
+    row.className = 'item-row';
+    row.id = 'row-' + id;
+    row.innerHTML = `
+      <div class="item-num">${id}</div>
+      <div class="item-desc-wrap">
+        <input class="item-name" type="text" placeholder="ชื่อรายการ / สินค้า / บริการ" oninput="saveData()">
+        <textarea class="item-detail" rows="1" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)" oninput="autoResize(this); saveData()"></textarea>
+      </div>
+      <input class="item-input" type="number" min="0" value="1" oninput="calcRow(${id}); saveData()">
+      <input class="item-input" type="number" min="0" value="0" oninput="calcRow(${id}); saveData()">
+      <div class="item-total" id="rt-${id}">0.00 ฿</div>
+      <button class="btn-del no-print" onclick="delRow(${id})" title="ลบรายการ">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+          <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+        </svg>
+      </button>
+    `;
+    body.appendChild(row);
+    calcTotal();
+  }
+
   function calcRow(id) {
-    const row = document.getElementById('row-' + id);
+    const row    = document.getElementById('row-' + id);
     const inputs = row.querySelectorAll('input[type=number]');
-    const qty = parseFloat(inputs[0].value) || 0;
-    const price = parseFloat(inputs[1].value) || 0;
+    const qty    = parseFloat(inputs[0].value) || 0;
+    const price  = parseFloat(inputs[1].value) || 0;
     document.getElementById('rt-' + id).textContent = fmt(qty * price);
     calcTotal();
   }
@@ -466,61 +513,74 @@
     saveData();
   }
 
-  /* ── SAVE / LOAD (localStorage) ── */
   function gatherData() {
     const rows = [];
     document.querySelectorAll('.item-row').forEach(row => {
-      const desc = row.querySelector('.item-desc')?.value || '';
+      const name   = row.querySelector('.item-name')?.value   || '';
+      const detail = row.querySelector('.item-detail')?.value || '';
       const inputs = row.querySelectorAll('input[type=number]');
-      rows.push({ desc, qty: inputs[0]?.value||'1', price: inputs[1]?.value||'0' });
+      rows.push({ name, detail, qty: inputs[0]?.value||'1', price: inputs[1]?.value||'0' });
     });
     return {
-      companyName: document.getElementById('companyName').value,
-      companySub:  document.getElementById('companySub').value,
-      issueDate:   document.getElementById('issueDate').value,
-      custName:    document.getElementById('custName').value,
-      custAddr:    document.getElementById('custAddr').value,
-      custTel:     document.getElementById('custTel').value,
-      custTax:     document.getElementById('custTax').value,
-      custEmail:   document.getElementById('custEmail').value,
-      payTerms:    document.getElementById('payTerms').value,
-      bankInfo:    document.getElementById('bankInfo').value,
-      notes:       document.getElementById('notes').value,
+      companyName:   document.getElementById('companyName').value,
+      companySub:    document.getElementById('companySub').value,
+      issueDate:     document.getElementById('issueDate').value,
+      custName:      document.getElementById('custName').value,
+      custAddr:      document.getElementById('custAddr').value,
+      custTel:       document.getElementById('custTel').value,
+      custTax:       document.getElementById('custTax').value,
+      custEmail:     document.getElementById('custEmail').value,
+      payTerms:      document.getElementById('payTerms').value,
+      bankInfo:      document.getElementById('bankInfo').value,
+      notes:         document.getElementById('notes').value,
+      sigSeller:     document.getElementById('sigSeller').value,
+      sigSellerDate: document.getElementById('sigSellerDate').value,
+      sigBuyer:      document.getElementById('sigBuyer').value,
+      sigBuyerDate:  document.getElementById('sigBuyerDate').value,
       rows
     };
   }
 
   function saveData() {
-    localStorage.setItem('quo_data', JSON.stringify(gatherData()));
+    try { localStorage.setItem('quo_data', JSON.stringify(gatherData())); } catch(e) {}
   }
 
   function loadData() {
-    const raw = localStorage.getItem('quo_data');
-    if (!raw) return;
+    let raw;
+    try { raw = localStorage.getItem('quo_data'); } catch(e) {}
+    if (!raw) { addRow(); addRow(); addRow(); return; }
     try {
-      const d = JSON.parse(raw);
-      document.getElementById('companyName').value = d.companyName || '';
-      document.getElementById('companySub').value  = d.companySub  || '';
-      document.getElementById('issueDate').value   = d.issueDate   || '';
-      document.getElementById('custName').value    = d.custName    || '';
-      document.getElementById('custAddr').value    = d.custAddr    || '';
-      document.getElementById('custTel').value     = d.custTel     || '';
-      document.getElementById('custTax').value     = d.custTax     || '';
-      document.getElementById('custEmail').value   = d.custEmail   || '';
-      document.getElementById('payTerms').value    = d.payTerms    || '';
-      document.getElementById('bankInfo').value    = d.bankInfo    || '';
-      document.getElementById('notes').value       = d.notes       || '';
+      const d   = JSON.parse(raw);
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+      set('companyName',   d.companyName);
+      set('companySub',    d.companySub);
+      set('issueDate',     d.issueDate);
+      set('custName',      d.custName);
+      set('custAddr',      d.custAddr);
+      set('custTel',       d.custTel);
+      set('custTax',       d.custTax);
+      set('custEmail',     d.custEmail);
+      set('payTerms',      d.payTerms);
+      set('bankInfo',      d.bankInfo);
+      set('notes',         d.notes);
+      set('sigSeller',     d.sigSeller);
+      set('sigSellerDate', d.sigSellerDate);
+      set('sigBuyer',      d.sigBuyer);
+      set('sigBuyerDate',  d.sigBuyerDate);
+
       if (d.rows && d.rows.length > 0) {
         d.rows.forEach(r => {
           addRow();
-          const id = rowCount;
+          const id  = rowCount;
           const row = document.getElementById('row-' + id);
-          row.querySelector('.item-desc').value = r.desc || '';
+          row.querySelector('.item-name').value = r.name || r.desc || '';
+          const detail = row.querySelector('.item-detail');
+          detail.value = r.detail || '';
+          autoResize(detail);
           const inputs = row.querySelectorAll('input[type=number]');
-          inputs[0].value = r.qty || '1';
+          inputs[0].value = r.qty   || '1';
           inputs[1].value = r.price || '0';
           calcRow(id);
-          autoResize(row.querySelector('.item-desc'));
         });
       } else {
         addRow(); addRow(); addRow();
@@ -530,67 +590,54 @@
     }
   }
 
-  /* ── AUTO-SAVE on any input ── */
   document.addEventListener('input', e => {
     if (e.target.closest('#form-area')) saveData();
   });
 
-  /* ── RESET ── */
   function resetForm() {
     if (!confirm('ล้างข้อมูลทั้งหมดใช่ไหม?')) return;
-    localStorage.removeItem('quo_data');
+    try { localStorage.removeItem('quo_data'); } catch(e) {}
     document.getElementById('itemsBody').innerHTML = '';
     rowCount = 0;
-    ['companyName','companySub','custName','custAddr','custTel',
-     'custTax','custEmail','payTerms','bankInfo','notes'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = '';
-    });
+    ['companyName','companySub','custName','custAddr','custTel','custTax','custEmail',
+     'payTerms','bankInfo','notes','sigSeller','sigSellerDate','sigBuyer','sigBuyerDate'
+    ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.getElementById('issueDate').value = new Date().toISOString().split('T')[0];
     addRow(); addRow(); addRow();
+    calcTotal();
     showToast('ล้างข้อมูลแล้ว ✓');
   }
 
-  /* ── EXPORT PDF (html2pdf.js) ── */
   async function exportPDF() {
     const btn = document.getElementById('pdfBtn');
     btn.disabled = true;
     btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> กำลังสร้าง...`;
 
-    // Snapshot textarea values into spans for PDF rendering
-    document.querySelectorAll('textarea, input[type=text], input[type=tel], input[type=email], input[type=date], input[type=number]').forEach(el => {
-      el.setAttribute('data-val', el.value);
-    });
-
-    const element = document.getElementById('form-area');
+    const element  = document.getElementById('form-area');
     const compName = document.getElementById('companyName').value || 'ใบเสนอราคา';
     const filename = `${compName}_${new Date().toISOString().slice(0,10)}.pdf`;
 
     const opt = {
-      margin: [10, 10, 10, 10],
+      margin: [8, 8, 8, 8],
       filename,
-      image: { type: 'jpeg', quality: 0.95 },
+      image:       { type: 'jpeg', quality: 0.97 },
       html2canvas: { scale: 2, useCORS: true, logging: false },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak:   { mode: ['avoid-all','css','legacy'], avoid: ['.bottom-row','.card'] }
     };
 
-    // Hide no-print elements
-    document.querySelectorAll('.no-print').forEach(el => el.style.display='none');
-
+    document.querySelectorAll('.no-print').forEach(el => el.style.display = 'none');
     try {
       await html2pdf().set(opt).from(element).save();
       showToast('ดาวน์โหลด PDF เรียบร้อย ✓');
     } catch(e) {
       showToast('เกิดข้อผิดพลาด กรุณาลองใหม่');
     }
-
-    document.querySelectorAll('.no-print').forEach(el => el.style.display='');
+    document.querySelectorAll('.no-print').forEach(el => el.style.display = '');
     btn.disabled = false;
     btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Export PDF`;
   }
 
-  /* ── TOAST ── */
   function showToast(msg) {
     const t = document.getElementById('toast');
     t.textContent = msg;
@@ -598,7 +645,7 @@
     setTimeout(() => t.classList.remove('show'), 2800);
   }
 
-  /* ── INIT ── */
+  /* INIT */
   document.getElementById('issueDate').value = new Date().toISOString().split('T')[0];
   loadData();
 </script>
