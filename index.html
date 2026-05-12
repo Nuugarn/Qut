@@ -158,10 +158,16 @@
   .item-row:last-child { border-bottom: none; }
   .item-row:nth-child(even) { background: #f9fbfd; }
 
-  .item-num {
-    text-align: center; font-size: 12px; color: var(--muted); font-weight: 600;
-    background: var(--light); border-radius: 6px; padding: 8px 0; margin-top: 1px;
+  .item-num-input-wrap {
+    display: flex; align-items: flex-start; justify-content: center; margin-top: 1px;
   }
+  .item-num-input {
+    text-align: center; font-size: 12px; color: var(--muted); font-weight: 600;
+    background: var(--light); border-radius: 6px; padding: 6px 2px;
+    border: 1.5px solid transparent; width: 100%;
+    font-family: 'Sarabun', sans-serif; transition: border .2s;
+  }
+  .item-num-input:focus { outline: none; border-color: var(--primary); color: var(--text); }
 
   /* ช่องรายการ: ชื่อ + รายละเอียด */
   .item-desc-wrap { display: flex; flex-direction: column; gap: 3px; }
@@ -220,11 +226,57 @@
 
   .summary-box {
     background: var(--light); border-radius: 10px;
-    border: 1.5px solid var(--border); padding: 14px 16px;
+    border: 1.5px solid var(--border); padding: 12px 16px;
   }
   .summary-total {
     display: flex; justify-content: space-between; align-items: center;
-    font-size: 18px; font-weight: 800; color: var(--primary);
+    font-size: 17px; font-weight: 800; color: var(--primary);
+  }
+
+  /* ── BOTTOM SECTION ── */
+  /* แถวบน: หมายเหตุ header (ซ้าย) | ยอดรวม text (ขวา) */
+  .footer-top-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0; border-radius: 14px 14px 0 0; overflow: hidden;
+    border: 1.5px solid var(--border); border-bottom: none;
+  }
+  .footer-top-left {
+    background: linear-gradient(135deg, var(--primary) 0%, #2a5c8e 100%);
+    padding: 11px 16px; display: flex; align-items: center; gap: 8px;
+    border-right: 1px solid rgba(255,255,255,.15);
+  }
+  .footer-top-left-icon {
+    width: 26px; height: 26px; border-radius: 7px;
+    background: rgba(255,255,255,.15);
+    display: flex; align-items: center; justify-content: center; color: var(--accent);
+    flex-shrink: 0;
+  }
+  .footer-top-left h3 { color: #fff; font-size: 13px; font-weight: 700; }
+  .footer-top-right {
+    background: #fff; padding: 11px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-left: 1px solid var(--border);
+  }
+  .footer-top-right-label { font-size: 14px; font-weight: 700; color: var(--primary); }
+  .footer-top-right-amount { font-size: 20px; font-weight: 800; color: var(--accent); }
+
+  /* แถวล่าง: ช่องหมายเหตุ (ซ้าย) | กล่องลายเซ็น (ขวา) */
+  .footer-bottom-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0; border-radius: 0 0 14px 14px; overflow: hidden;
+    border: 1.5px solid var(--border); border-top: none;
+    margin-bottom: 14px;
+  }
+  @media(max-width:540px) {
+    .footer-top-row, .footer-bottom-row { grid-template-columns: 1fr; }
+    .footer-top-row { border-radius: 14px 14px 0 0; }
+  }
+  .footer-bottom-left {
+    padding: 14px 16px; border-right: 1px solid var(--border);
+    background: #fff;
+  }
+  .footer-bottom-right {
+    padding: 14px 16px; background: #fff;
   }
 
   /* ลายเซ็น inline */
@@ -252,8 +304,14 @@
     border: none; border-bottom: 1px dashed var(--border);
     font-family: 'Sarabun', sans-serif; font-size: 11px; text-align: center;
     width: 100%; background: transparent; color: var(--text); padding: 1px 0; margin-top: 2px;
+    -webkit-appearance: none;
   }
+  .sig-date-input::-webkit-calendar-picker-indicator { opacity: .5; cursor: pointer; }
   .sig-date-input:focus { outline: none; border-bottom-color: var(--primary); }
+  .sig-date-display {
+    font-size: 11px; color: var(--primary); font-weight: 600;
+    text-align: center; margin-top: 2px; min-height: 16px;
+  }
 
   /* TOAST */
   .toast {
@@ -271,20 +329,23 @@
     .topbar, .btn-add-row, .btn-del, .no-print { display: none !important; }
     .wrapper { padding: 0 !important; max-width: 100%; }
     .card, .doc-header { box-shadow: none; margin-bottom: 8px; page-break-inside: avoid; }
-    .item-name, .item-detail, .item-input,
+    .item-name, .item-detail, .item-input, .item-num-input,
     .company-name-input, .company-sub-input, .badge-date-input,
     .field input, .field textarea,
-    .sig-name-input, .sig-date-input {
+    .sig-name-input {
       border: none !important; box-shadow: none !important;
       background: transparent !important; padding: 2px 4px !important;
     }
+    .sig-date-input { display: none !important; }
+    .sig-date-display { display: block !important; font-size: 11px; color: var(--primary); font-weight: 600; text-align: center; }
     .badge-date-input { color: #fff !important; }
     .field input { border-bottom: 1px solid #bbb !important; }
     .item-name   { border-bottom: 1px solid #ddd !important; }
     .item-detail { color: #555 !important; }
-    .items-header, .doc-top, .card-header {
+    .items-header, .doc-top, .card-header, .footer-top-left {
       -webkit-print-color-adjust: exact; print-color-adjust: exact;
     }
+    .footer-top-row, .footer-bottom-row { page-break-inside: avoid; break-inside: avoid; }
     .bottom-row { page-break-inside: avoid; break-inside: avoid; }
   }
 </style>
@@ -361,22 +422,16 @@
     </div>
   </div>
 
-  <!-- ③ รายการสินค้า -->
+  <!-- ③ รายการสินค้า (ไม่มี header) -->
   <div class="card">
-    <div class="card-header">
-      <div class="card-header-icon">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-      </div>
-      <h2>รายการสินค้า / บริการ</h2>
-    </div>
     <div class="card-body" style="padding-top:12px">
       <div class="items-wrapper">
         <div class="items-header">
-          <span>#</span>
+          <span>ลำดับ</span>
           <span>รายการ / รายละเอียด</span>
           <span>จำนวน</span>
           <span>ราคา/หน่วย</span>
-          <span>รวม</span>
+          <span>ราคารวม</span>
           <span></span>
         </div>
         <div class="items-body" id="itemsBody"></div>
@@ -385,59 +440,63 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         เพิ่มรายการ
       </button>
-
-      <!-- ยอดรวม + ลายเซ็น วางข้างกัน -->
-      <div class="bottom-row">
-        <div class="summary-box">
-          <div class="summary-total">
-            <span>ยอดรวมทั้งสิ้น</span>
-            <span id="grandTotal">0.00 ฿</span>
-          </div>
-        </div>
-        <div class="sig-inline">
-          <div class="sig-inline-title">ลายเซ็นผู้อนุมัติ</div>
-          <div class="sig-cols">
-            <div class="sig-col">
-              <div class="sig-col-label">ผู้เสนอราคา</div>
-              <div class="sig-space"></div>
-              <input class="sig-name-input" id="sigSeller" type="text" placeholder="ชื่อ - นามสกุล">
-              <div class="sig-date-label">วันที่</div>
-              <input class="sig-date-input" id="sigSellerDate" type="text" placeholder="วว/ดด/ปปปป">
-            </div>
-            <div class="sig-col">
-              <div class="sig-col-label">ผู้อนุมัติ / ลูกค้า</div>
-              <div class="sig-space"></div>
-              <input class="sig-name-input" id="sigBuyer" type="text" placeholder="ชื่อ - นามสกุล">
-              <div class="sig-date-label">วันที่</div>
-              <input class="sig-date-input" id="sigBuyerDate" type="text" placeholder="วว/ดด/ปปปป">
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
-  <!-- ④ หมายเหตุ: 3 ช่องในบรรทัดเดียว -->
-  <div class="card">
-    <div class="card-header">
-      <div class="card-header-icon">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+  <!-- ④ bottom section ตามรูป -->
+
+  <!-- แถวบน: หมายเหตุ header (ซ้าย) | ยอดรวม (ขวา) -->
+  <div class="footer-top-row">
+    <div class="footer-top-left">
+      <div class="footer-top-left-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       </div>
-      <h2>หมายเหตุ</h2>
+      <h3>หมายเหตุ</h3>
     </div>
-    <div class="card-body">
-      <div class="grid3" style="margin-bottom:0">
-        <div class="field" style="margin-bottom:0">
-          <label>เงื่อนไขการชำระเงิน</label>
-          <input type="text" id="payTerms" placeholder="เช่น ชำระภายใน 30 วัน">
-        </div>
-        <div class="field" style="margin-bottom:0">
-          <label>บัญชีธนาคาร</label>
-          <input type="text" id="bankInfo" placeholder="เช่น กสิกรไทย 123-4-56789-0">
-        </div>
-        <div class="field" style="margin-bottom:0">
-          <label>หมายเหตุเพิ่มเติม</label>
-          <input type="text" id="notes" placeholder="หมายเหตุ / เงื่อนไขพิเศษ">
+    <div class="footer-top-right">
+      <span class="footer-top-right-label">ยอดรวมทั้งสิ้น</span>
+      <span class="footer-top-right-amount" id="grandTotal">0.00 ฿</span>
+    </div>
+  </div>
+
+  <!-- แถวล่าง: ช่องหมายเหตุ (ซ้าย) | ลายเซ็น (ขวา) -->
+  <div class="footer-bottom-row">
+    <div class="footer-bottom-left">
+      <div class="field" style="margin-bottom:10px">
+        <label>เงื่อนไขการชำระเงิน</label>
+        <input type="text" id="payTerms" placeholder="เช่น ชำระภายใน 30 วัน">
+      </div>
+      <div class="field" style="margin-bottom:10px">
+        <label>บัญชีธนาคาร</label>
+        <input type="text" id="bankInfo" placeholder="เช่น กสิกรไทย 123-4-56789-0">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>หมายเหตุเพิ่มเติม</label>
+        <input type="text" id="notes" placeholder="หมายเหตุ / เงื่อนไขพิเศษ">
+      </div>
+    </div>
+    <div class="footer-bottom-right">
+      <div class="sig-inline">
+        <div class="sig-inline-title">ลายเซ็นผู้อนุมัติ</div>
+        <div class="sig-cols">
+          <div class="sig-col">
+            <div class="sig-col-label">ผู้เสนอราคา</div>
+            <div class="sig-space"></div>
+            <input class="sig-name-input" id="sigSeller" type="text" placeholder="ชื่อ - นามสกุล">
+            <div class="sig-date-label">วันที่</div>
+            <input type="date" class="sig-date-input badge-date-input" id="sigSellerDate"
+              onchange="updateSigDate('sigSellerDate','sigSellerDateDisplay'); saveData()">
+            <div class="sig-date-display" id="sigSellerDateDisplay"></div>
+          </div>
+          <div class="sig-col">
+            <div class="sig-col-label">ผู้อนุมัติ / ลูกค้า</div>
+            <div class="sig-space"></div>
+            <input class="sig-name-input" id="sigBuyer" type="text" placeholder="ชื่อ - นามสกุล">
+            <div class="sig-date-label">วันที่</div>
+            <input type="date" class="sig-date-input badge-date-input" id="sigBuyerDate"
+              onchange="updateSigDate('sigBuyerDate','sigBuyerDateDisplay'); saveData()">
+            <div class="sig-date-display" id="sigBuyerDateDisplay"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -452,6 +511,21 @@
 
 <script>
   let rowCount = 0;
+
+  const thaiMonths = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.',
+                      'ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+  function fmtThaiDate(val) {
+    if (!val) return '';
+    const [y, m, d] = val.split('-');
+    return `${parseInt(d)} ${thaiMonths[parseInt(m)-1]} ${parseInt(y)+543}`;
+  }
+
+  function updateSigDate(inputId, displayId) {
+    const val = document.getElementById(inputId)?.value || '';
+    const el  = document.getElementById(displayId);
+    if (el) el.textContent = fmtThaiDate(val);
+  }
 
   function fmt(n) {
     return Number(n).toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ฿';
@@ -470,7 +544,9 @@
     row.className = 'item-row';
     row.id = 'row-' + id;
     row.innerHTML = `
-      <div class="item-num">${id}</div>
+      <div class="item-num-input-wrap">
+        <input class="item-num-input" type="text" value="${id}" oninput="saveData()">
+      </div>
       <div class="item-desc-wrap">
         <input class="item-name" type="text" placeholder="ชื่อรายการ / สินค้า / บริการ" oninput="saveData()">
         <textarea class="item-detail" rows="1" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)" oninput="autoResize(this); saveData()"></textarea>
@@ -516,10 +592,11 @@
   function gatherData() {
     const rows = [];
     document.querySelectorAll('.item-row').forEach(row => {
-      const name   = row.querySelector('.item-name')?.value   || '';
-      const detail = row.querySelector('.item-detail')?.value || '';
+      const num    = row.querySelector('.item-num-input')?.value  || '';
+      const name   = row.querySelector('.item-name')?.value       || '';
+      const detail = row.querySelector('.item-detail')?.value     || '';
       const inputs = row.querySelectorAll('input[type=number]');
-      rows.push({ name, detail, qty: inputs[0]?.value||'1', price: inputs[1]?.value||'0' });
+      rows.push({ num, name, detail, qty: inputs[0]?.value||'1', price: inputs[1]?.value||'0' });
     });
     return {
       companyName:   document.getElementById('companyName').value,
@@ -567,12 +644,16 @@
       set('sigSellerDate', d.sigSellerDate);
       set('sigBuyer',      d.sigBuyer);
       set('sigBuyerDate',  d.sigBuyerDate);
+      updateSigDate('sigSellerDate','sigSellerDateDisplay');
+      updateSigDate('sigBuyerDate','sigBuyerDateDisplay');
 
       if (d.rows && d.rows.length > 0) {
         d.rows.forEach(r => {
           addRow();
           const id  = rowCount;
           const row = document.getElementById('row-' + id);
+          const numInput = row.querySelector('.item-num-input');
+          if (numInput) numInput.value = r.num || String(rowCount);
           row.querySelector('.item-name').value = r.name || r.desc || '';
           const detail = row.querySelector('.item-detail');
           detail.value = r.detail || '';
