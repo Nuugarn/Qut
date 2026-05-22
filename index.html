@@ -574,7 +574,11 @@
     </div>
     <div class="footer-top-right">
       <span class="footer-top-right-label">ยอดรวมทั้งสิ้น</span>
-      <span class="footer-top-right-amount" id="grandTotal">0.00 ฿</span>
+      <input class="footer-top-right-amount" id="grandTotal" type="text" value="0.00 ฿"
+        oninput="saveData()" onclick="this.select()"
+        style="background:transparent;border:none;border-bottom:1.5px dashed rgba(255,255,255,.4);
+               outline:none;text-align:right;width:auto;min-width:120px;cursor:text;
+               font-family:'Sarabun',sans-serif;">
     </div>
   </div>
 
@@ -678,7 +682,7 @@
       </td>
       <td class="td-num-val"><input class="item-input" type="number" min="0" value="1" oninput="calcRow(${id}); saveData()"></td>
       <td class="td-num-val"><input class="item-input" type="number" min="0" value="0" oninput="calcRow(${id}); saveData()"></td>
-      <td class="td-num-val"><div class="item-total" id="rt-${id}">0.00 ฿</div></td>
+      <td class="td-num-val"><input class="item-total item-input" id="rt-${id}" type="text" value="0.00 ฿" onclick="this.select()" oninput="calcTotal(); saveData()" style="border-bottom:1px dashed #b8c8d8;cursor:text;"></td>
       <td class="no-print" style="padding:0;vertical-align:middle;text-align:center">
         <button class="btn-del" onclick="delRow(${id})" title="ลบรายการ">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -697,17 +701,18 @@
     const inputs = row.querySelectorAll('input[type=number]');
     const qty    = parseFloat(inputs[0].value) || 0;
     const price  = parseFloat(inputs[1].value) || 0;
-    document.getElementById('rt-' + id).textContent = fmt(qty * price);
+    document.getElementById('rt-' + id).value = fmt(qty * price);
     calcTotal();
   }
 
   function calcTotal() {
     let total = 0;
     document.querySelectorAll('.item-row').forEach(row => {
-      const inputs = row.querySelectorAll('input[type=number]');
-      total += (parseFloat(inputs[0]?.value)||0) * (parseFloat(inputs[1]?.value)||0);
+      const rtInput = row.querySelector('.item-total');
+      const val = rtInput ? parseFloat(rtInput.value.replace(/[^0-9.-]/g,'')) || 0 : 0;
+      total += val;
     });
-    document.getElementById('grandTotal').textContent = fmt(total);
+    document.getElementById('grandTotal').value = fmt(total);
   }
 
   function delRow(id) {
@@ -723,7 +728,8 @@
       const name   = row.querySelector('.item-name')?.value       || '';
       const detail = row.querySelector('.item-detail')?.value     || '';
       const inputs = row.querySelectorAll('input[type=number]');
-      rows.push({ num, name, detail, qty: inputs[0]?.value||'1', price: inputs[1]?.value||'0' });
+      const rtInput = row.querySelector('.item-total');
+      rows.push({ num, name, detail, qty: inputs[0]?.value||'1', price: inputs[1]?.value||'0', rowTotal: rtInput?.value||'' });
     });
     return {
       companyName:   document.getElementById('companyName').value,
@@ -741,6 +747,7 @@
       sigSellerDate: document.getElementById('sigSellerDate').value,
       sigBuyer:      document.getElementById('sigBuyer').value,
       sigBuyerDate:  document.getElementById('sigBuyerDate').value,
+      grandTotal:    document.getElementById('grandTotal').value,
       rows
     };
   }
@@ -771,6 +778,7 @@
       set('sigSellerDate', d.sigSellerDate);
       set('sigBuyer',      d.sigBuyer);
       set('sigBuyerDate',  d.sigBuyerDate);
+      if (d.grandTotal) { const el = document.getElementById('grandTotal'); if (el) el.value = d.grandTotal; }
       updateSigDate('sigSellerDate','sigSellerDateDisplay');
       updateSigDate('sigBuyerDate','sigBuyerDateDisplay');
 
@@ -789,6 +797,7 @@
           inputs[0].value = r.qty   || '1';
           inputs[1].value = r.price || '0';
           calcRow(id);
+          if (r.rowTotal) { const rt = document.getElementById('rt-' + id); if (rt) rt.value = r.rowTotal; }
         });
       } else {
         addRow(); addRow(); addRow();
