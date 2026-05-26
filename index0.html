@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ใบเสนอราคา</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  :root {
+    --primary: #1a3c5e;
+    --accent:  #e8a020;
+    --light:   #f5f8fc;
+    --border:  #c8d8e8;
+    --text:    #1a2a3a;
+    --muted:   #6a8aaa;
+    --danger:  #e05050;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background: #e8eef5;
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--primary);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.3);
+  }
+  .topbar-title { color: #fff; font-weight: 700; font-size: 16px; }
+  .topbar-title span { color: var(--accent); }
+  .topbar-actions { display: flex; gap: 8px; align-items: center; }
+  .btn {
+    border: none; padding: 8px 16px; border-radius: 8px;
+    font-family: 'Sarabun', sans-serif; font-size: 13px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; gap: 6px;
+    transition: all .2s;
+  }
+  .btn-pdf   { background: var(--accent); color: #fff; }
+  .btn-pdf:hover { background: #c88a10; }
+  .btn-reset { background: rgba(255,255,255,.15); color: #fff; }
+  .btn-reset:hover { background: rgba(255,255,255,.25); }
+  .btn:disabled { opacity: .6; cursor: not-allowed; }
+
+  /* WRAPPER */
+  .wrapper { max-width: 780px; margin: 0 auto; padding: 76px 12px 40px; }
+
+  /* CARD */
+  .card {
+    background: #fff; border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(26,60,94,.10);
+    overflow: hidden; margin-bottom: 14px;
+  }
+  .card-header {
+    background: linear-gradient(135deg, var(--primary) 0%, #2a5c8e 100%);
+    padding: 13px 18px; display: flex; align-items: center; gap: 10px;
+  }
+  .card-header-icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: rgba(255,255,255,.15);
+    display: flex; align-items: center; justify-content: center; color: var(--accent);
+  }
+  .card-header h2 { color: #fff; font-size: 14px; font-weight: 700; }
+  .card-body { padding: 16px 18px; }
+
+  /* DOC HEADER */
+  .doc-header {
+    background: #fff; border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(26,60,94,.10);
+    overflow: hidden; margin-bottom: 14px;
+  }
+  .doc-top {
+    background: linear-gradient(135deg, var(--primary) 0%, #2a5c8e 100%);
+    padding: 22px 20px 18px;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  }
+  .company-name-input {
+    font-size: 20px; font-weight: 800; color: #fff;
+    background: rgba(255,255,255,.12); border: 1.5px dashed rgba(255,255,255,.4);
+    border-radius: 8px; padding: 6px 10px; width: 100%;
+    font-family: 'Sarabun', sans-serif;
+  }
+  .company-name-input::placeholder { color: rgba(255,255,255,.45); }
+  .company-sub-input {
+    font-size: 12px; color: rgba(255,255,255,.8);
+    background: rgba(255,255,255,.08); border: 1px dashed rgba(255,255,255,.3);
+    border-radius: 6px; padding: 4px 8px; width: 100%; margin-top: 6px;
+    font-family: 'Sarabun', sans-serif;
+  }
+
+  /* badge — วันที่ใต้ชื่อเอกสาร */
+  .doc-badge {
+    background: var(--accent); border-radius: 10px;
+    padding: 10px 14px; text-align: center; min-width: 120px; flex-shrink: 0;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .badge-title { font-size: 17px; font-weight: 800; color: #fff; letter-spacing: 1px; white-space: nowrap; }
+  .badge-date-input {
+    background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.45);
+    border-radius: 6px; padding: 3px 6px;
+    font-family: 'Sarabun', sans-serif; font-size: 12px; color: #fff;
+    text-align: center; width: 100%; -webkit-appearance: none;
+  }
+  .badge-date-input::-webkit-calendar-picker-indicator { filter: invert(1); opacity: .7; cursor: pointer; }
+  .badge-date-input:focus { outline: none; border-color: rgba(255,255,255,.9); }
+
+  /* FIELDS */
+  .field { margin-bottom: 12px; }
+  .field label {
+    display: block; font-size: 11px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px;
+  }
+  .field input, .field textarea, .field select {
+    width: 100%; padding: 9px 12px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    font-family: 'Sarabun', sans-serif; font-size: 14px; color: var(--text);
+    background: #fff; transition: border .2s, box-shadow .2s;
+    -webkit-appearance: none;
+  }
+  .field input:focus, .field textarea:focus {
+    outline: none; border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26,60,94,.1);
+  }
+  .field textarea { resize: vertical; min-height: 60px; }
+
+  /* GRIDS */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media(max-width:540px) { .grid2, .grid3 { grid-template-columns: 1fr; gap: 8px; } }
+
+  /* ITEMS TABLE */
+  /* ══════════════════════════════════════════
+     ITEMS TABLE — BOQ / Accounting Document Style
+     Full grid · Dense · Rigid · Print-first
+  ══════════════════════════════════════════ */
+
+  /* outer wrapper: no radius, hard 1px border */
+  .items-wrapper {
+    width: 100%;
+    border: 1px solid #8a9bb0;
+    overflow: hidden;
+  }
+
+  .items-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 13px;
+    font-family: 'Sarabun', sans-serif;
+  }
+
+  /* fixed column widths */
+  .items-table .col-num   { width: 42px; }
+  .items-table .col-desc  { width: auto; }
+  .items-table .col-qty   { width: 62px; }
+  .items-table .col-price { width: 108px; }
+  .items-table .col-total { width: 108px; }
+
+  /* ── HEADER: dark, opaque, clearly a heading row ── */
+  .items-table thead th {
+    background: #1a3c5e;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .4px;
+    padding: 7px 8px;
+    text-align: center;
+    border-right: 1px solid #2e5580;
+    border-bottom: 2px solid #8a9bb0;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+  .items-table thead th:nth-child(2) { text-align: left; }
+
+  /* ── BODY ROWS: full grid, every cell bordered ── */
+  .items-table tbody tr {
+    background: #ffffff;
+  }
+  .items-table tbody td {
+    padding: 0;
+    border-right: 1px solid #b8c8d8;
+    border-bottom: 1px solid #b8c8d8;
+    vertical-align: top;
+    line-height: 1.4;
+  }
+  .items-table tbody tr:last-child td { border-bottom: none; }
+
+  /* ── num cell: centered, accent bg, distinct from content ── */
+  .td-num {
+    background: #eef3f8;
+    border-right: 2px solid #8a9bb0 !important;
+    text-align: center;
+    padding: 0 !important;
+  }
+  .item-num-input {
+    display: block; width: 100%;
+    padding: 6px 2px;
+    text-align: center;
+    font-size: 12px; font-weight: 700; color: #2a4060;
+    font-family: 'Sarabun', sans-serif;
+    background: transparent; border: none;
+  }
+  .item-num-input:focus { outline: 2px solid #4a90d9; outline-offset: -2px; }
+
+  /* ── desc cell: two layers separated by inner border ── */
+  .td-desc { padding: 0 !important; vertical-align: top; }
+  .item-desc-wrap { display: flex; flex-direction: column; }
+
+  /* top layer: item title */
+  .item-name-row {
+    padding: 5px 8px 4px;
+    border-bottom: 1px solid #d0dce8;
+  }
+  .item-name {
+    display: block; width: 100%;
+    border: none; padding: 0;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 13px; font-weight: 600; color: var(--text);
+    background: transparent;
+  }
+  .item-name::placeholder { font-weight: 400; color: #a0b4c8; }
+  .item-name:focus { outline: 2px solid #4a90d9; outline-offset: 1px; }
+
+  /* bottom layer: detail sub-row, lighter background */
+  .item-detail-row {
+    padding: 3px 8px 4px;
+    background: #f8fafc;
+  }
+  .item-detail {
+    display: block; width: 100%;
+    border: none; padding: 0;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 11px; color: #5a7590;
+    background: transparent;
+    resize: none; overflow: hidden;
+    line-height: 1.35; min-height: 0;
+  }
+  .item-detail::placeholder { color: #a8bece; font-style: italic; }
+  .item-detail:focus { outline: 2px solid #4a90d9; outline-offset: 1px; }
+
+  /* ── numeric cells: top-aligned, consistent padding ── */
+  .td-num-val {
+    padding: 5px 8px !important;
+    vertical-align: top;
+    text-align: right;
+  }
+  .item-input {
+    display: block; width: 100%;
+    border: none; padding: 0;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 13px; color: var(--text);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    text-align: right;
+    background: transparent;
+  }
+  .item-input:focus { outline: 2px solid #4a90d9; outline-offset: -2px; }
+
+  .item-total {
+    font-size: 13px; font-weight: 700;
+    color: #1a3c5e;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  .btn-del {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; height: 100%;
+    background: none; border: none; cursor: pointer;
+    color: #b0bcc8; transition: color .15s;
+  }
+  .btn-del:hover { color: var(--danger); }
+
+  .btn-add-row {
+    display: flex; align-items: center; gap: 6px;
+    background: #f4f7fa;
+    border: 1px solid #8a9bb0;
+    border-radius: 0;
+    padding: 6px 14px;
+    font-family: 'Sarabun', sans-serif; font-size: 13px;
+    color: #3a5070; font-weight: 600;
+    cursor: pointer; transition: background .15s;
+  }
+  .btn-add-row:hover { background: #e8eef5; color: var(--primary); }
+
+  /* SUMMARY + SIGNATURE วางข้างกัน */
+  .bottom-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 14px; margin-top: 14px; align-items: end;
+  }
+  @media(max-width:520px) { .bottom-row { grid-template-columns: 1fr; } }
+
+  .summary-box {
+    background: var(--light); border-radius: 10px;
+    border: 1.5px solid var(--border); padding: 12px 16px;
+  }
+  .summary-total {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 17px; font-weight: 800; color: var(--primary);
+  }
+
+  /* ── BOTTOM SECTION ── */
+  /* แถวบน: หมายเหตุ header (ซ้าย) | ยอดรวม text (ขวา) */
+  .footer-top-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0; border-radius: 14px 14px 0 0; overflow: hidden;
+    border: 1.5px solid var(--border); border-bottom: none;
+  }
+  .footer-top-left {
+    background: linear-gradient(135deg, var(--primary) 0%, #2a5c8e 100%);
+    padding: 11px 16px; display: flex; align-items: center; gap: 8px;
+    border-right: 1px solid rgba(255,255,255,.15);
+  }
+  .footer-top-left-icon {
+    width: 26px; height: 26px; border-radius: 7px;
+    background: rgba(255,255,255,.15);
+    display: flex; align-items: center; justify-content: center; color: var(--accent);
+    flex-shrink: 0;
+  }
+  .footer-top-left h3 { color: #fff; font-size: 13px; font-weight: 700; }
+  /* ── 4. TOTAL: focal point of the document ── */
+  .footer-top-right {
+    background: var(--primary); padding: 14px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-left: none;
+  }
+  .footer-top-right-label {
+    font-size: 12px; font-weight: 700; color: rgba(255,255,255,.75);
+    letter-spacing: .5px; text-transform: uppercase;
+  }
+  .footer-top-right-amount {
+    font-size: 26px; font-weight: 800; color: var(--accent);
+    font-variant-numeric: tabular-nums; font-feature-settings: "tnum";
+    letter-spacing: -.5px;
+  }
+
+  /* ── 4. SIGNATURE: balanced, not floating ── */
+  .sig-inline {
+    background: #fff; border-radius: 8px;
+    border: 1.5px solid var(--border); padding: 16px 14px 14px;
+  }
+  .sig-inline-title {
+    font-size: 10px; font-weight: 800; color: var(--primary);
+    text-transform: uppercase; letter-spacing: .7px;
+    text-align: center; margin-bottom: 14px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .sig-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .sig-col { text-align: center; }
+  .sig-col-label {
+    font-size: 10px; color: var(--muted); font-weight: 700;
+    text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px;
+  }
+  /* longer, more prominent signature line */
+  .sig-space {
+    height: 44px;
+    border-bottom: 1.5px solid var(--text);
+    margin-bottom: 8px; opacity: .25;
+  }
+  .sig-name-input {
+    border: none; border-bottom: 1.5px dashed var(--border);
+    font-family: 'Sarabun', sans-serif; font-size: 12px; text-align: center;
+    width: 100%; background: transparent; color: var(--text); padding: 3px 0;
+  }
+  .sig-name-input:focus { outline: none; border-bottom-color: var(--primary); }
+  .sig-date-label {
+    font-size: 10px; color: var(--muted); margin-top: 6px; font-weight: 600;
+    letter-spacing: .3px;
+  }
+  .sig-date-input {
+    border: none; border-bottom: 1px dashed var(--border);
+    font-family: 'Sarabun', sans-serif; font-size: 11px; text-align: center;
+    width: 100%; background: transparent; color: var(--text); padding: 2px 0; margin-top: 3px;
+    -webkit-appearance: none;
+  }
+  .sig-date-input::-webkit-calendar-picker-indicator { opacity: .5; cursor: pointer; }
+  .sig-date-input:focus { outline: none; border-bottom-color: var(--primary); }
+  .sig-date-display {
+    font-size: 11px; color: var(--primary); font-weight: 600;
+    text-align: center; margin-top: 3px; min-height: 16px;
+  }
+
+  /* footer layout */
+  .footer-bottom-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0; border-radius: 0 0 14px 14px; overflow: hidden;
+    border: 1.5px solid var(--border); border-top: none;
+    margin-bottom: 14px;
+  }
+  @media(max-width:540px) {
+    .footer-top-row, .footer-bottom-row { grid-template-columns: 1fr; }
+    .footer-top-row { border-radius: 14px 14px 0 0; }
+  }
+  .footer-bottom-left {
+    padding: 16px 18px; border-right: 1px solid var(--border);
+    background: #fff;
+  }
+  .footer-bottom-right {
+    padding: 16px 18px; background: #fff;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: #1a2a3a; color: #fff; padding: 10px 22px; border-radius: 30px;
+    font-size: 14px; font-weight: 600; z-index: 999;
+    opacity: 0; transition: opacity .3s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+
+  /* PRINT / PDF */
+  @media print {
+    @page { size: A4; margin: 12mm 12mm 12mm 12mm; }
+    body { background: #fff !important; font-size: 12px; }
+    .topbar, .btn-add-row, .btn-del, .no-print { display: none !important; }
+    .wrapper { padding: 0 !important; max-width: 100%; }
+    .card, .doc-header { box-shadow: none; margin-bottom: 8px; page-break-inside: avoid; }
+    .item-name, .item-detail, .item-input, .item-num-input,
+    .company-name-input, .company-sub-input, .badge-date-input,
+    .field input, .field textarea,
+    .sig-name-input {
+      border: none !important; box-shadow: none !important;
+      background: transparent !important; padding: 2px 4px !important;
+    }
+    .items-table { font-size: 11px; }
+    .items-table thead th { padding: 5px 7px !important; }
+    .td-num-val { padding: 4px 7px !important; }
+    .item-name-row { padding: 4px 7px 3px !important; }
+    .item-detail-row { padding: 2px 7px 3px !important; }
+    .items-table thead th,
+    .items-table tbody td {
+      border-color: #8a9bb0 !important;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    .items-table thead tr { background: #1a3c5e !important; }
+    .td-num { background: #eef3f8 !important; }
+    .item-detail-row { background: #f8fafc !important; }
+    .sig-date-input { display: none !important; }
+    .sig-date-display { display: block !important; font-size: 11px; color: var(--primary); font-weight: 600; text-align: center; }
+    .badge-date-input { color: #fff !important; }
+    .field input { border-bottom: 1px solid #bbb !important; }
+    .item-name   { border-bottom: 1px solid #ddd !important; }
+    .item-detail { color: #555 !important; }
+    .items-header, .doc-top, .card-header, .footer-top-left, .footer-top-right {
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    .footer-top-row, .footer-bottom-row { page-break-inside: avoid; break-inside: avoid; }
+    .bottom-row { page-break-inside: avoid; break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-title">📄 ใบเสนอ<span>ราคา</span></div>
+  <div class="topbar-actions">
+    <button class="btn btn-reset" onclick="resetForm()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+      ล้างข้อมูล
+    </button>
+    <button class="btn btn-pdf" id="pdfBtn" onclick="exportPDF()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Export PDF
+    </button>
+  </div>
+</div>
+
+<div class="wrapper" id="form-area">
+
+  <!-- ① DOC HEADER -->
+  <div class="doc-header">
+    <div class="doc-top">
+      <div style="flex:1">
+        <input class="company-name-input" id="companyName" type="text" placeholder="ชื่อบริษัท / ร้านค้า">
+        <input class="company-sub-input"  id="companySub"  type="text" placeholder="ที่อยู่ / เบอร์โทร / อีเมล">
+      </div>
+      <!-- วันที่อยู่ใต้ "ใบเสนอราคา" ในกล่องสีส้ม -->
+      <div class="doc-badge">
+        <div class="badge-title">ใบเสนอราคา</div>
+        <input type="text" id="issueDate" class="badge-date-input" placeholder="วว/ดด/ปปปป"
+               style="font-weight:700;color:#fff;">
+      </div>
+    </div>
+  </div>
+
+  <!-- ② ข้อมูลลูกค้า 2 แถว -->
+  <div class="card">
+    <div class="card-body">
+      <!-- แถว 1: ชื่อ | ที่อยู่ -->
+      <div class="grid2" style="margin-bottom:10px">
+        <div class="field" style="margin-bottom:0">
+          <label>ลูกค้า</label>
+          <input type="text" id="custName" placeholder="กรอกชื่อลูกค้าหรือบริษัท">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>ที่อยู่</label>
+          <input type="text" id="custAddr" placeholder="ที่อยู่สำหรับออกเอกสาร">
+        </div>
+      </div>
+      <!-- แถว 2: เบอร์ | เลขภาษี | อีเมล -->
+      <div class="grid3" style="margin-bottom:0">
+        <div class="field" style="margin-bottom:0">
+          <label>โทร</label>
+          <input type="tel" id="custTel" placeholder="08x-xxx-xxxx">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>เลขผู้เสียภาษี</label>
+          <input type="text" id="custTax" placeholder="0-0000-00000-00-0">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>อีเมล</label>
+          <input type="email" id="custEmail" placeholder="email@example.com">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ รายการสินค้า -->
+  <div style="margin-bottom:14px">
+    <div class="items-wrapper">
+        <table class="items-table">
+          <colgroup>
+            <col class="col-num">
+            <col class="col-desc">
+            <col class="col-qty">
+            <col class="col-price">
+            <col class="col-total">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>ลำดับ</th>
+              <th>รายการ / รายละเอียด</th>
+              <th>จำนวน</th>
+              <th>ราคา/หน่วย</th>
+              <th>ราคารวม</th>
+            </tr>
+          </thead>
+          <tbody id="itemsBody"></tbody>
+        </table>
+    </div>
+    <div style="padding:8px 0 0" class="no-print">
+      <button class="btn-add-row" onclick="addRow()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        + เพิ่มรายการ
+      </button>
+    </div>
+  </div>
+
+  <!-- ④ bottom section ตามรูป -->
+
+  <!-- แถวบน: หมายเหตุ header (ซ้าย) | ยอดรวม (ขวา) -->
+  <div class="footer-top-row">
+    <div class="footer-top-left">
+      <div class="footer-top-left-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <h3>หมายเหตุ</h3>
+    </div>
+    <div class="footer-top-right">
+      <span class="footer-top-right-label">ยอดรวมทั้งสิ้น</span>
+      <input class="footer-top-right-amount" id="grandTotal" type="text" value="0.00 ฿"
+        oninput="saveData()" onclick="this.select()"
+        style="background:transparent;border:none;border-bottom:1.5px dashed rgba(255,255,255,.4);
+               outline:none;text-align:right;width:auto;min-width:120px;cursor:text;
+               font-family:'Sarabun',sans-serif;">
+    </div>
+  </div>
+
+  <!-- แถวล่าง: ช่องหมายเหตุ (ซ้าย) | ลายเซ็น (ขวา) -->
+  <div class="footer-bottom-row">
+    <div class="footer-bottom-left">
+      <div class="field" style="margin-bottom:10px">
+        <label>เงื่อนไขการชำระเงิน</label>
+        <input type="text" id="payTerms" placeholder="เช่น ชำระภายใน 30 วัน">
+      </div>
+      <div class="field" style="margin-bottom:10px">
+        <label>บัญชีธนาคาร</label>
+        <input type="text" id="bankInfo" placeholder="เช่น กสิกรไทย 123-4-56789-0">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>หมายเหตุเพิ่มเติม</label>
+        <input type="text" id="notes" placeholder="หมายเหตุ / เงื่อนไขพิเศษ">
+      </div>
+    </div>
+    <div class="footer-bottom-right">
+      <div class="sig-inline">
+        <div class="sig-inline-title">ลายเซ็นผู้อนุมัติ</div>
+        <div class="sig-cols">
+          <div class="sig-col">
+            <div class="sig-col-label">ผู้เสนอราคา</div>
+            <div class="sig-space"></div>
+            <input class="sig-name-input" id="sigSeller" type="text" placeholder="ชื่อ - นามสกุล">
+            <div class="sig-date-label">วันที่</div>
+            <input type="date" class="sig-date-input badge-date-input" id="sigSellerDate"
+              onchange="updateSigDate('sigSellerDate','sigSellerDateDisplay'); saveData()">
+            <div class="sig-date-display" id="sigSellerDateDisplay"></div>
+          </div>
+          <div class="sig-col">
+            <div class="sig-col-label">ผู้อนุมัติ / ลูกค้า</div>
+            <div class="sig-space"></div>
+            <input class="sig-name-input" id="sigBuyer" type="text" placeholder="ชื่อ - นามสกุล">
+            <div class="sig-date-label">วันที่</div>
+            <input type="date" class="sig-date-input badge-date-input" id="sigBuyerDate"
+              onchange="updateSigDate('sigBuyerDate','sigBuyerDateDisplay'); saveData()">
+            <div class="sig-date-display" id="sigBuyerDateDisplay"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:8px 0 4px;font-size:11px;color:var(--muted)" class="no-print">
+    กด <strong>Export PDF</strong> ด้านบน เพื่อดาวน์โหลดไฟล์ PDF
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let rowCount = 0;
+
+  const thaiMonths = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.',
+                      'ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+  function fmtThaiDate(val) {
+    if (!val) return '';
+    const [y, m, d] = val.split('-');
+    return `${parseInt(d)} ${thaiMonths[parseInt(m)-1]} ${parseInt(y)+543}`;
+  }
+
+  function updateSigDate(inputId, displayId) {
+    const val = document.getElementById(inputId)?.value || '';
+    const el  = document.getElementById(displayId);
+    if (el) el.textContent = fmtThaiDate(val);
+  }
+
+  function fmt(n) {
+    return Number(n).toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ฿';
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+
+  function addRow() {
+    rowCount++;
+    const id   = rowCount;
+    const body = document.getElementById('itemsBody');
+    const row  = document.createElement('tr');
+    row.className = 'item-row';
+    row.id = 'row-' + id;
+    row.innerHTML = `
+      <td class="td-num" style="position:relative;">
+        <input class="item-num-input" type="text" value="${id}" oninput="saveData()">
+        <button class="btn-del no-print" onclick="delRow(${id})" title="ลบรายการ"
+          style="position:absolute;top:2px;right:2px;width:16px;height:16px;padding:0;display:flex;align-items:center;justify-content:center;">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </td>
+      <td class="td-desc">
+        <div class="item-desc-wrap">
+          <div class="item-name-row">
+            <input class="item-name" type="text" placeholder="ชื่อรายการ / สินค้า / บริการ" oninput="saveData()">
+          </div>
+          <div class="item-detail-row">
+            <textarea class="item-detail" rows="1" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)" oninput="autoResize(this); saveData()"></textarea>
+          </div>
+        </div>
+      </td>
+      <td class="td-num-val"><input class="item-input" type="number" min="0" value="1" oninput="calcRow(${id}); saveData()"></td>
+      <td class="td-num-val"><input class="item-input" type="number" min="0" value="0" oninput="calcRow(${id}); saveData()"></td>
+      <td class="td-num-val"><input class="item-total item-input" id="rt-${id}" type="text" value="0.00 ฿" onclick="this.select()" oninput="calcTotal(); saveData()" style="border-bottom:1px dashed #b8c8d8;cursor:text;"></td>
+    `;
+    body.appendChild(row);
+    calcTotal();
+  }
+
+  function calcRow(id) {
+    const row    = document.getElementById('row-' + id);
+    const inputs = row.querySelectorAll('input[type=number]');
+    const qty    = parseFloat(inputs[0].value) || 0;
+    const price  = parseFloat(inputs[1].value) || 0;
+    document.getElementById('rt-' + id).value = fmt(qty * price);
+    calcTotal();
+  }
+
+  function calcTotal() {
+    let total = 0;
+    document.querySelectorAll('.item-row').forEach(row => {
+      const rtInput = row.querySelector('.item-total');
+      const val = rtInput ? parseFloat(rtInput.value.replace(/[^0-9.-]/g,'')) || 0 : 0;
+      total += val;
+    });
+    document.getElementById('grandTotal').value = fmt(total);
+  }
+
+  function delRow(id) {
+    document.getElementById('row-' + id)?.remove();
+    calcTotal();
+    saveData();
+  }
+
+  function gatherData() {
+    const rows = [];
+    document.querySelectorAll('.item-row').forEach(row => {
+      const num    = row.querySelector('.item-num-input')?.value  || '';
+      const name   = row.querySelector('.item-name')?.value       || '';
+      const detail = row.querySelector('.item-detail')?.value     || '';
+      const inputs = row.querySelectorAll('input[type=number]');
+      const rtInput = row.querySelector('.item-total');
+      rows.push({ num, name, detail, qty: inputs[0]?.value||'1', price: inputs[1]?.value||'0', rowTotal: rtInput?.value||'' });
+    });
+    return {
+      companyName:   document.getElementById('companyName').value,
+      companySub:    document.getElementById('companySub').value,
+      issueDate:     document.getElementById('issueDate').value,
+      custName:      document.getElementById('custName').value,
+      custAddr:      document.getElementById('custAddr').value,
+      custTel:       document.getElementById('custTel').value,
+      custTax:       document.getElementById('custTax').value,
+      custEmail:     document.getElementById('custEmail').value,
+      payTerms:      document.getElementById('payTerms').value,
+      bankInfo:      document.getElementById('bankInfo').value,
+      notes:         document.getElementById('notes').value,
+      sigSeller:     document.getElementById('sigSeller').value,
+      sigSellerDate: document.getElementById('sigSellerDate').value,
+      sigBuyer:      document.getElementById('sigBuyer').value,
+      sigBuyerDate:  document.getElementById('sigBuyerDate').value,
+      grandTotal:    document.getElementById('grandTotal').value,
+      rows
+    };
+  }
+
+  function saveData() {
+    try { localStorage.setItem('quo_data', JSON.stringify(gatherData())); } catch(e) {}
+  }
+
+  function loadData() {
+    let raw;
+    try { raw = localStorage.getItem('quo_data'); } catch(e) {}
+    if (!raw) { addRow(); addRow(); addRow(); return; }
+    try {
+      const d   = JSON.parse(raw);
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+      set('companyName',   d.companyName);
+      set('companySub',    d.companySub);
+      set('issueDate',     d.issueDate);
+      set('custName',      d.custName);
+      set('custAddr',      d.custAddr);
+      set('custTel',       d.custTel);
+      set('custTax',       d.custTax);
+      set('custEmail',     d.custEmail);
+      set('payTerms',      d.payTerms);
+      set('bankInfo',      d.bankInfo);
+      set('notes',         d.notes);
+      set('sigSeller',     d.sigSeller);
+      set('sigSellerDate', d.sigSellerDate);
+      set('sigBuyer',      d.sigBuyer);
+      set('sigBuyerDate',  d.sigBuyerDate);
+      if (d.grandTotal) { const el = document.getElementById('grandTotal'); if (el) el.value = d.grandTotal; }
+      updateSigDate('sigSellerDate','sigSellerDateDisplay');
+      updateSigDate('sigBuyerDate','sigBuyerDateDisplay');
+
+      if (d.rows && d.rows.length > 0) {
+        d.rows.forEach(r => {
+          addRow();
+          const id  = rowCount;
+          const row = document.getElementById('row-' + id);
+          const numInput = row.querySelector('.item-num-input');
+          if (numInput) numInput.value = r.num || String(rowCount);
+          row.querySelector('.item-name').value = r.name || r.desc || '';
+          const detail = row.querySelector('.item-detail');
+          detail.value = r.detail || '';
+          autoResize(detail);
+          const inputs = row.querySelectorAll('input[type=number]');
+          inputs[0].value = r.qty   || '1';
+          inputs[1].value = r.price || '0';
+          calcRow(id);
+          if (r.rowTotal) { const rt = document.getElementById('rt-' + id); if (rt) rt.value = r.rowTotal; }
+        });
+      } else {
+        addRow(); addRow(); addRow();
+      }
+    } catch(e) {
+      addRow(); addRow(); addRow();
+    }
+  }
+
+  document.addEventListener('input', e => {
+    if (e.target.closest('#form-area')) saveData();
+  });
+
+  function resetForm() {
+    if (!confirm('ล้างข้อมูลทั้งหมดใช่ไหม?')) return;
+    try { localStorage.removeItem('quo_data'); } catch(e) {}
+    document.getElementById('itemsBody').innerHTML = '';
+    rowCount = 0;
+    ['companyName','companySub','custName','custAddr','custTel','custTax','custEmail',
+     'payTerms','bankInfo','notes','sigSeller','sigSellerDate','sigBuyer','sigBuyerDate'
+    ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    const now2 = new Date();
+    const dd2 = String(now2.getDate()).padStart(2,'0');
+    const mm2 = String(now2.getMonth()+1).padStart(2,'0');
+    const yyyy2 = now2.getFullYear();
+    document.getElementById('issueDate').value = `${dd2}/${mm2}/${yyyy2}`;
+    addRow(); addRow(); addRow();
+    calcTotal();
+    showToast('ล้างข้อมูลแล้ว ✓');
+  }
+
+  async function exportPDF() {
+    const btn = document.getElementById('pdfBtn');
+    btn.disabled = true;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> กำลังสร้าง...`;
+
+    const element  = document.getElementById('form-area');
+    const compName = document.getElementById('companyName').value || 'ใบเสนอราคา';
+    const filename = `${compName}_${new Date().toISOString().slice(0,10)}.pdf`;
+
+    const opt = {
+      margin: [8, 8, 8, 8],
+      filename,
+      image:       { type: 'jpeg', quality: 0.97 },
+      html2canvas: { scale: 2, useCORS: true, logging: false },
+      jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak:   { mode: ['avoid-all','css','legacy'], avoid: ['.bottom-row','.card'] }
+    };
+
+    document.querySelectorAll('.no-print').forEach(el => el.style.display = 'none');
+    try {
+      await html2pdf().set(opt).from(element).save();
+      showToast('ดาวน์โหลด PDF เรียบร้อย ✓');
+    } catch(e) {
+      showToast('เกิดข้อผิดพลาด กรุณาลองใหม่');
+    }
+    document.querySelectorAll('.no-print').forEach(el => el.style.display = '');
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Export PDF`;
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  /* INIT */
+  (function() {
+    const now = new Date();
+    const dd = String(now.getDate()).padStart(2,'0');
+    const mm = String(now.getMonth()+1).padStart(2,'0');
+    const yyyy = now.getFullYear();
+    document.getElementById('issueDate').value = `${dd}/${mm}/${yyyy}`;
+  })();
+  loadData();
+</script>
+</body>
+</html>
