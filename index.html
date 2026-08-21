@@ -263,6 +263,9 @@
     background: transparent;
   }
   .item-input:focus { outline: 2px solid #4a90d9; outline-offset: -2px; }
+  .price-input::-webkit-outer-spin-button,
+  .price-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .price-input { -moz-appearance: textfield; }
 
   .item-total {
     font-size: 13px; font-weight: 700;
@@ -579,13 +582,16 @@
     <!-- ขวา: ยอดรวม -->
     <div style="display:flex; align-items:center; gap:12px; padding-top:6px">
       <span style="font-size:13px; font-weight:700; color:var(--primary)">ยอดรวมทั้งสิ้น</span>
-      <input id="grandTotal" type="text" value="0.00 ฿"
-        oninput="saveData()" onclick="this.select()"
-        style="font-size:18px; font-weight:800; color:#1F3A5F;
-               background:transparent; border:none; outline:none;
-               text-align:right; width:auto; min-width:120px; cursor:text;
-               font-family:'Sarabun',sans-serif;
-               font-variant-numeric:tabular-nums;">
+      <div style="display:flex; align-items:baseline; gap:4px">
+        <input id="grandTotal" type="text" inputmode="decimal" value="0.00"
+          oninput="saveData()" onclick="this.select()" onblur="formatTotalOnBlur(this); saveData()"
+          style="font-size:18px; font-weight:800; color:#1F3A5F;
+                 background:transparent; border:none; outline:none;
+                 text-align:right; width:140px; flex-shrink:0; cursor:text;
+                 font-family:'Sarabun',sans-serif;
+                 font-variant-numeric:tabular-nums;">
+        <span style="font-size:14px; font-weight:700; color:#1F3A5F; flex-shrink:0;">บาท</span>
+      </div>
     </div>
 
   </div>
@@ -644,26 +650,41 @@
   }
 
   function fmt(n) {
-    return Number(n).toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ฿';
+    return Number(n).toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2});
   }
 
-  function formatPriceInput(el) {
-    const raw = el.value.replace(/[^0-9]/g, '');
-    if (!raw) {
-      el.value = '';
-      return;
-    }
+  function showPriceInput(id) {
+    const row = document.getElementById('row-' + id);
+    const span = row.querySelector('.price-display');
+    const input = row.querySelector('.price-input');
+    span.style.display = 'none';
+    input.style.display = 'block';
+    input.focus();
+    input.select();
+  }
 
-    const cursorFromEnd = el.value.length - (el.selectionStart ?? el.value.length);
-    el.value = Number(raw).toLocaleString('en-US');
+  function formatPriceDisplay(id) {
+    const row = document.getElementById('row-' + id);
+    const input = row.querySelector('.price-input');
+    const span = row.querySelector('.price-display');
+    const raw = parseFloat(input.value) || 0;
+    span.textContent = raw.toLocaleString('en-US');
+  }
 
-    // Keep the caret stable when commas are inserted/removed.
-    const nextPos = Math.max(0, el.value.length - cursorFromEnd);
-    try { el.setSelectionRange(nextPos, nextPos); } catch (e) {}
+  function hidePriceInput(id) {
+    formatPriceDisplay(id);
+    const row = document.getElementById('row-' + id);
+    row.querySelector('.price-input').style.display = 'none';
+    row.querySelector('.price-display').style.display = 'block';
   }
 
   function parsePriceInput(el) {
     return parseFloat((el?.value || '').replace(/,/g, '').replace(/[^0-9.]/g, '')) || 0;
+  }
+
+  function formatTotalOnBlur(el) {
+    const raw = parseFloat((el?.value || '').replace(/,/g, '').replace(/[^0-9.]/g, '')) || 0;
+    el.value = fmt(raw);
   }
 
   function autoResize(el) {
@@ -698,9 +719,12 @@
           </div>
         </div>
       </td>
-      <td class="td-num-val"><input class="item-input" type="number" min="0" value="1" inputmode="numeric" oninput="calcRow(${id}); saveData()"></td>
-      <td class="td-num-val"><input class="item-input price-input" type="tel" value="0" inputmode="numeric" pattern="[0-9]*" autocomplete="off" oninput="formatPriceInput(this); calcRow(${id}); saveData()"></td>
-      <td class="td-num-val"><input class="item-total item-input" id="rt-${id}" type="text" value="0.00 ฿" onclick="this.select()" oninput="calcTotal(); saveData()" style="border-bottom:1px dashed #b8c8d8;cursor:text;"></td>
+      <td class="td-num-val"><input class="item-input qty-input" type="number" min="0" value="1" inputmode="numeric" oninput="calcRow(${id}); saveData()"></td>
+      <td class="td-num-val">
+        <span class="item-input price-display" onclick="showPriceInput(${id})" style="cursor:text;">0</span>
+        <input class="item-input price-input" type="number" min="0" step="1" value="0" inputmode="numeric" pattern="[0-9]*" autocomplete="off" style="display:none;" onblur="hidePriceInput(${id})" oninput="calcRow(${id}); saveData()">
+      </td>
+      <td class="td-num-val"><input class="item-total item-input" id="rt-${id}" type="text" inputmode="decimal" value="0.00" onclick="this.select()" oninput="calcTotal(); saveData()" onblur="formatTotalOnBlur(this); calcTotal(); saveData()" style="border-bottom:1px dashed #b8c8d8;cursor:text;"></td>
     `;
     body.appendChild(row);
     calcTotal();
@@ -708,7 +732,7 @@
 
   function calcRow(id) {
     const row    = document.getElementById('row-' + id);
-    const qtyInput = row.querySelector('input[type=number]');
+    const qtyInput = row.querySelector('.qty-input');
     const priceInput = row.querySelector('.price-input');
     const qty   = parseFloat(qtyInput?.value) || 0;
     const price = parsePriceInput(priceInput);
@@ -738,7 +762,7 @@
       const num    = row.querySelector('.item-num-input')?.value  || '';
       const name   = row.querySelector('.item-name')?.value       || '';
       const detail = row.querySelector('.item-detail')?.value     || '';
-      const qtyInput = row.querySelector('input[type=number]');
+      const qtyInput = row.querySelector('.qty-input');
       const priceInput = row.querySelector('.price-input');
       const rtInput = row.querySelector('.item-total');
       rows.push({
@@ -812,11 +836,11 @@
           const detail = row.querySelector('.item-detail');
           detail.value = r.detail || '';
           autoResize(detail);
-          const qtyInput = row.querySelector('input[type=number]');
+          const qtyInput = row.querySelector('.qty-input');
           const priceInput = row.querySelector('.price-input');
           qtyInput.value = r.qty || '1';
           priceInput.value = String(r.price || '0').replace(/[^0-9]/g, '');
-          formatPriceInput(priceInput);
+          formatPriceDisplay(id);
           calcRow(id);
           if (r.rowTotal) { const rt = document.getElementById('rt-' + id); if (rt) rt.value = r.rowTotal; }
         });
