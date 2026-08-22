@@ -264,8 +264,7 @@
     <div class="summary-widget no-print" id="summaryWidget">
       <h4>แสดงในยอดสรุป</h4>
       <label><input type="checkbox" id="showSubTotal" checked onchange="applySummaryVisibility(); saveData()"> ยอดรวมรายการ</label>
-      <label><input type="checkbox" id="showDiscount" checked onchange="applySummaryVisibility(); saveData()"> ส่วนลด</label>
-      <label><input type="checkbox" id="showAfterDiscount" checked onchange="applySummaryVisibility(); saveData()"> ยอดหลังหักส่วนลด</label>
+      <label><input type="checkbox" id="showWht" checked onchange="applySummaryVisibility(); saveData()"> หักภาษี ณ ที่จ่าย 3%</label>
       <label><input type="checkbox" id="showVat" checked onchange="applySummaryVisibility(); saveData()"> รวม VAT 7%</label>
     </div>
     <button class="btn btn-reset" onclick="resetForm()">
@@ -302,7 +301,12 @@
         <div style="margin-top:1.5em; display:flex; flex-direction:column; gap:4px">
           <div style="display:flex; align-items:center; gap:6px">
             <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">เลขที่</span>
-            <input type="text" id="docNo" oninput="saveData()" style="width:50%; margin-left:auto; font-size:11px; color:var(--text); border:none; background:transparent; font-family:'Sarabun',sans-serif; padding:1px 0;">
+            <div style="width:50%; margin-left:auto; display:flex; align-items:center; justify-content:flex-start; font-size:11px; color:var(--text); font-family:'Sarabun',sans-serif;">
+              <span style="user-select:none; pointer-events:none; font-weight:600; flex-shrink:0;">QS-</span>
+              <input type="text" id="docNoNum" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="000"
+                oninput="onCodeInput(this)" onblur="padCode(this)" onclick="this.select()"
+                style="width:2.2em; border:none; background:transparent; font-size:11px; color:var(--text); font-family:'Sarabun',sans-serif; padding:1px 0; text-align:left;">
+            </div>
           </div>
           <div style="display:flex; align-items:center; gap:6px">
             <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">วันที่</span>
@@ -318,7 +322,12 @@
           </div>
           <div style="display:flex; align-items:center; gap:6px">
             <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">อ้างอิง</span>
-            <input type="text" id="docRef" oninput="saveData()" style="width:50%; margin-left:auto; font-size:11px; color:var(--text); border:none; background:transparent; font-family:'Sarabun',sans-serif; padding:1px 0;">
+            <div style="width:50%; margin-left:auto; display:flex; align-items:center; justify-content:flex-start; font-size:11px; color:var(--text); font-family:'Sarabun',sans-serif;">
+              <span style="user-select:none; pointer-events:none; font-weight:600; flex-shrink:0;">BS-</span>
+              <input type="text" id="docRefNum" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="000"
+                oninput="onCodeInput(this)" onblur="padCode(this)" onclick="this.select()"
+                style="width:2.2em; border:none; background:transparent; font-size:11px; color:var(--text); font-family:'Sarabun',sans-serif; padding:1px 0; text-align:left;">
+            </div>
           </div>
         </div>
       </div>
@@ -366,13 +375,11 @@
         <span>ยอดรวมรายการ</span>
         <span id="subTotalDisplay">0.00</span>
       </div>
-      <div class="summary-row" id="rowDiscount">
-        <span>ส่วนลด</span>
-        <input type="number" id="discount" min="0" step="0.01" value="0" oninput="calcTotal(); saveData()">
-      </div>
-      <div class="summary-row" id="rowAfterDiscount">
-        <span>ยอดหลังหักส่วนลด</span>
-        <span id="afterDiscountDisplay">0.00</span>
+      <div class="summary-row" id="rowWht">
+        <label class="vat-toggle">
+          <input type="checkbox" id="whtToggle" onchange="calcTotal(); saveData()"> หักภาษี ณ ที่จ่าย 3%
+        </label>
+        <span id="whtDisplay">0.00</span>
       </div>
       <div class="summary-row" id="rowVat">
         <label class="vat-toggle">
@@ -583,14 +590,21 @@
       const val = rtInput ? parseFloat(rtInput.value.replace(/[^0-9.-]/g,'')) || 0 : 0;
       subTotal += val;
     });
-    const discount = parseFloat(document.getElementById('discount')?.value) || 0;
-    const afterDiscount = Math.max(0, subTotal - discount);
+
+    const useWht = document.getElementById('whtToggle')?.checked;
     const useVat = document.getElementById('vatToggle')?.checked;
-    const vat = useVat ? afterDiscount * 0.07 : 0;
-    const grand = afterDiscount + vat;
+
+    // VAT คิดจากยอดรวมรายการ
+    const vat = useVat ? subTotal * 0.07 : 0;
+    // หัก ณ ที่จ่าย 3% คิดจากยอดรวมรายการ (ฐานบริการทั่วไป)
+    const wht = useWht ? subTotal * 0.03 : 0;
+
+    // ยอดสุทธิ = ยอดรวม + VAT - หัก ณ ที่จ่าย
+    const grand = subTotal + vat - wht;
 
     document.getElementById('subTotalDisplay').textContent = fmt(subTotal);
-    document.getElementById('afterDiscountDisplay').textContent = fmt(afterDiscount);
+    const whtEl = document.getElementById('whtDisplay');
+    if (whtEl) whtEl.textContent = useWht ? ('-' + fmt(wht)) : '0.00';
     document.getElementById('vatDisplay').textContent = fmt(vat);
     document.getElementById('grandTotalDisplay').textContent = fmt(grand) + ' บาท';
     document.getElementById('thaiTextDisplay').textContent = '(' + ThaiBahtText(grand) + ')';
@@ -600,6 +614,26 @@
     document.getElementById('row-' + id)?.remove();
     calcTotal();
     saveData();
+  }
+
+  function onCodeInput(el) {
+    // อนุญาตเฉพาะตัวเลข ไม่เกิน 3 หลัก
+    el.value = el.value.replace(/\D/g, '').slice(0, 3);
+    saveData();
+  }
+  function padCode(el) {
+    // เติม 0 ด้านหน้าให้ครบ 3 หลัก
+    const n = (el.value || '').replace(/\D/g, '');
+    el.value = n.padStart(3, '0');
+    saveData();
+  }
+  function getDocNo() {
+    const n = (document.getElementById('docNoNum')?.value || '000').replace(/\D/g, '').padStart(3, '0');
+    return 'QS-' + n;
+  }
+  function getDocRef() {
+    const n = (document.getElementById('docRefNum')?.value || '000').replace(/\D/g, '').padStart(3, '0');
+    return 'BS-' + n;
   }
 
   function toggleSummaryWidget(e) {
@@ -617,8 +651,7 @@
   function applySummaryVisibility() {
     const map = [
       ['showSubTotal', 'rowSubTotal'],
-      ['showDiscount', 'rowDiscount'],
-      ['showAfterDiscount', 'rowAfterDiscount'],
+      ['showWht', 'rowWht'],
       ['showVat', 'rowVat']
     ];
     map.forEach(([cbId, rowId]) => {
@@ -643,17 +676,16 @@
     return {
       companyNote: document.getElementById('companyNote')?.value || '',
       custName: document.getElementById('custName')?.value || '',
-      docNo: document.getElementById('docNo')?.value || '',
+      docNoNum: (document.getElementById('docNoNum')?.value || '000').replace(/\D/g, '').padStart(3, '0'),
       docDate: document.getElementById('docDate')?.value || '',
       dueDate: document.getElementById('dueDate')?.value || '',
       issuerName: document.getElementById('issuerName')?.value || '',
-      docRef: document.getElementById('docRef')?.value || '',
+      docRefNum: (document.getElementById('docRefNum')?.value || '000').replace(/\D/g, '').padStart(3, '0'),
       remarks: document.getElementById('remarks')?.value || '',
-      discount: document.getElementById('discount')?.value || '0',
+      whtToggle: document.getElementById('whtToggle')?.checked || false,
       vatToggle: document.getElementById('vatToggle')?.checked || false,
       showSubTotal: document.getElementById('showSubTotal')?.checked !== false,
-      showDiscount: document.getElementById('showDiscount')?.checked !== false,
-      showAfterDiscount: document.getElementById('showAfterDiscount')?.checked !== false,
+      showWht: document.getElementById('showWht')?.checked !== false,
       showVat: document.getElementById('showVat')?.checked !== false,
       sigSeller: document.getElementById('sigSeller')?.value || '',
       sigSellerDate: document.getElementById('sigSellerDate')?.value || '',
@@ -682,16 +714,19 @@
       const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
       set('companyNote', d.companyNote);
       set('custName', d.custName);
-      set('docNo', d.docNo);
+      // รองรับทั้งค่าเก่า (QS-001) และค่าใหม่ (แค่เลข)
+      const noNum = (d.docNoNum || (d.docNo || '').replace(/\D/g, '') || '000').replace(/\D/g, '').slice(-3).padStart(3, '0');
+      const refNum = (d.docRefNum || (d.docRef || '').replace(/\D/g, '') || '000').replace(/\D/g, '').slice(-3).padStart(3, '0');
+      set('docNoNum', noNum);
       set('docDate', d.docDate);
       set('dueDate', d.dueDate);
       set('issuerName', d.issuerName);
-      set('docRef', d.docRef);
+      set('docRefNum', refNum);
       set('remarks', d.remarks);
-      set('discount', d.discount || '0');
+      if (document.getElementById('whtToggle')) document.getElementById('whtToggle').checked = !!d.whtToggle;
       if (document.getElementById('vatToggle')) document.getElementById('vatToggle').checked = !!d.vatToggle;
       // restore summary visibility
-      ['showSubTotal','showDiscount','showAfterDiscount','showVat'].forEach(k => {
+      ['showSubTotal','showWht','showVat'].forEach(k => {
         const el = document.getElementById(k);
         if (el) el.checked = d[k] !== false;
       });
@@ -737,13 +772,15 @@
     try { localStorage.removeItem('quo_data'); } catch(e) {}
     document.getElementById('itemsBody').innerHTML = '';
     rowCount = 0;
-    ['companyNote','custName','docNo','docDate','dueDate','issuerName','docRef','remarks',
+    ['companyNote','custName','docDate','dueDate','issuerName','remarks',
      'sigSeller','sigSellerDate','sigBuyer','sigBuyerDate'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
-    document.getElementById('discount').value = '0';
-    document.getElementById('vatToggle').checked = false;
+    if (document.getElementById('docNoNum')) document.getElementById('docNoNum').value = '000';
+    if (document.getElementById('docRefNum')) document.getElementById('docRefNum').value = '000';
+    if (document.getElementById('whtToggle')) document.getElementById('whtToggle').checked = false;
+    if (document.getElementById('vatToggle')) document.getElementById('vatToggle').checked = false;
     const now = new Date();
     document.getElementById('docDate').value = now.toISOString().slice(0,10);
     addRow(); addRow(); addRow();
