@@ -1,9 +1,716 @@
 <!DOCTYPE html>
 <html lang="th">
-<head><meta charset="UTF-8"><title>ใบเสนอราคา - Updating...</title></head>
-<body style="font-family:sans-serif;padding:40px;text-align:center">
-<h1>กำลังอัปเดต...</h1>
-<p>กรุณารอสักครู่ ระบบกำลังอัปเดตไฟล์ใบเสนอราคา</p>
-<p>หากเห็นข้อความนี้เกิน 5 นาที ให้แจ้ง Grok อีกครั้ง</p>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ใบเสนอราคา</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  :root {
+    --primary: #1a3c5e;
+    --accent:  #e8a020;
+    --light:   #f5f8fc;
+    --border:  #c8d8e8;
+    --text:    #1a2a3a;
+    --muted:   #6a8aaa;
+    --danger:  #e05050;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background: #e8eef5;
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--primary);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.3);
+  }
+  .topbar-title { color: #fff; font-weight: 700; font-size: 16px; }
+  .topbar-title span { color: var(--accent); }
+  .topbar-actions { display: flex; gap: 8px; align-items: center; }
+  .btn {
+    border: none; padding: 8px 16px; border-radius: 8px;
+    font-family: 'Sarabun', sans-serif; font-size: 13px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; gap: 6px;
+    transition: all .2s;
+  }
+  .btn-pdf   { background: var(--accent); color: #fff; }
+  .btn-pdf:hover { background: #c88a10; }
+  .btn-reset { background: rgba(255,255,255,.15); color: #fff; }
+  .btn-reset:hover { background: rgba(255,255,255,.25); }
+  .btn:disabled { opacity: .6; cursor: not-allowed; }
+  .wrapper { max-width: 780px; margin: 0 auto; padding: 76px 12px 40px; }
+  .doc-header { margin-bottom: 14px; }
+  .doc-top {
+    background: transparent; padding: 0 0 10px;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  }
+  .doc-badge { flex-shrink: 0; text-align: right; }
+  .badge-title {
+    font-size: 17px; font-weight: 800; letter-spacing: 1px; white-space: nowrap;
+    background: linear-gradient(to right, #0D4067, #125A8B);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .items-wrapper { width: 100%; border: 1px solid #8a9bb0; overflow: hidden; }
+  .items-table {
+    width: 100%; border-collapse: collapse; table-layout: fixed;
+    font-size: 13px; font-family: 'Sarabun', sans-serif;
+  }
+  .items-table .col-num   { width: 42px; }
+  .items-table .col-desc  { width: auto; }
+  .items-table .col-qty   { width: 62px; }
+  .items-table .col-price { width: 108px; }
+  .items-table .col-total { width: 108px; }
+  .items-table thead th {
+    background: #1a3c5e; color: #ffffff; font-size: 12px; font-weight: 700;
+    letter-spacing: .4px; padding: 7px 8px; text-align: center;
+    border-right: 1px solid #2e5580; border-bottom: 2px solid #8a9bb0;
+    white-space: nowrap; vertical-align: middle;
+  }
+  .items-table thead th:nth-child(2) { text-align: left; }
+  .items-table tbody tr { background: #ffffff; }
+  .items-table tbody td {
+    padding: 0; border-right: 1px solid #b8c8d8; border-bottom: 1px solid #b8c8d8;
+    vertical-align: top; line-height: 1.4;
+  }
+  .items-table tbody tr:last-child td { border-bottom: none; }
+  .td-num {
+    background: #eef3f8; border-right: 2px solid #8a9bb0 !important;
+    text-align: center; padding: 0 !important;
+  }
+  .item-num-input {
+    display: block; width: 100%; padding: 6px 2px; text-align: center;
+    font-size: 12px; font-weight: 700; color: #2a4060;
+    font-family: 'Sarabun', sans-serif; background: transparent; border: none;
+  }
+  .item-num-input:focus { outline: 2px solid #4a90d9; outline-offset: -2px; }
+  .td-desc { padding: 0 !important; vertical-align: top; }
+  .item-desc-wrap { display: flex; flex-direction: column; }
+  .item-name-row { padding: 5px 8px 4px; border-bottom: 1px solid #d0dce8; }
+  .item-name {
+    display: block; width: 100%; border: none; padding: 0;
+    font-family: 'Sarabun', sans-serif; font-size: 13px; font-weight: 600; color: var(--text);
+    background: transparent;
+  }
+  .item-name::placeholder { font-weight: 400; color: #a0b4c8; }
+  .item-name:focus { outline: 2px solid #4a90d9; outline-offset: 1px; }
+  .item-detail-row { padding: 3px 8px 4px; background: #f8fafc; }
+  .item-detail {
+    display: block; width: 100%; border: none; padding: 0;
+    font-family: 'Sarabun', sans-serif; font-size: 11px; color: #5a7590;
+    background: transparent; resize: none; overflow: hidden; line-height: 1.35; min-height: 0;
+  }
+  .item-detail::placeholder { color: #a8bece; font-style: italic; }
+  .item-detail:focus { outline: 2px solid #4a90d9; outline-offset: 1px; }
+  .td-num-val { padding: 5px 8px !important; vertical-align: top; text-align: right; }
+  .item-input {
+    display: block; width: 100%; border: none; padding: 0;
+    font-family: 'Sarabun', sans-serif; font-size: 13px; color: var(--text);
+    font-variant-numeric: tabular-nums; font-feature-settings: "tnum";
+    text-align: right; background: transparent;
+  }
+  .item-input:focus { outline: 2px solid #4a90d9; outline-offset: -2px; }
+  .price-input::-webkit-outer-spin-button,
+  .price-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .price-input { -moz-appearance: textfield; }
+  .item-total {
+    font-size: 13px; font-weight: 700; color: #1a3c5e;
+    font-variant-numeric: tabular-nums; font-feature-settings: "tnum";
+  }
+  .btn-del {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; height: 100%; background: none; border: none; cursor: pointer;
+    color: #b0bcc8; transition: color .15s;
+  }
+  .btn-del:hover { color: var(--danger); }
+  .btn-add-row {
+    display: flex; align-items: center; gap: 6px; background: #f4f7fa;
+    border: 1px solid #8a9bb0; border-radius: 0; padding: 6px 14px;
+    font-family: 'Sarabun', sans-serif; font-size: 13px; color: #3a5070; font-weight: 600;
+    cursor: pointer; transition: background .15s;
+  }
+  .btn-add-row:hover { background: #e8eef5; color: var(--primary); }
+  .sig-inline {
+    background: #fff; border-radius: 8px; border: 1.5px solid var(--border); padding: 16px 14px 14px;
+  }
+  .sig-inline-title {
+    font-size: 10px; font-weight: 800; color: var(--primary);
+    text-transform: uppercase; letter-spacing: .7px; text-align: center; margin-bottom: 14px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .sig-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .sig-col { text-align: center; }
+  .sig-col-label {
+    font-size: 10px; color: var(--muted); font-weight: 700;
+    text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px;
+  }
+  .sig-space { height: 44px; border-bottom: 1.5px solid var(--text); margin-bottom: 8px; opacity: .25; }
+  .sig-name-input {
+    border: none; border-bottom: 1.5px dashed var(--border);
+    font-family: 'Sarabun', sans-serif; font-size: 12px; text-align: center;
+    width: 100%; background: transparent; color: var(--text); padding: 3px 0;
+  }
+  .sig-name-input:focus { outline: none; border-bottom-color: var(--primary); }
+  .sig-date-label { font-size: 10px; color: var(--muted); margin-top: 6px; font-weight: 600; letter-spacing: .3px; }
+  .sig-date-input {
+    border: none; border-bottom: 1px dashed var(--border);
+    font-family: 'Sarabun', sans-serif; font-size: 11px; text-align: center;
+    width: 100%; background: transparent; color: var(--text); padding: 2px 0; margin-top: 3px;
+    -webkit-appearance: none;
+  }
+  .sig-date-input::-webkit-calendar-picker-indicator { opacity: .5; cursor: pointer; }
+  .sig-date-input:focus { outline: none; border-bottom-color: var(--primary); }
+  .sig-date-display { font-size: 11px; color: var(--primary); font-weight: 600; text-align: center; margin-top: 3px; min-height: 16px; }
+  .footer-bottom-row {
+    display: grid; grid-template-columns: 1fr; gap: 0; border-radius: 0 0 14px 14px; overflow: hidden;
+    border: 1.5px solid var(--border); margin-bottom: 14px;
+  }
+  .footer-bottom-right { padding: 16px 18px; background: #fff; }
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: #1a2a3a; color: #fff; padding: 10px 22px; border-radius: 30px;
+    font-size: 14px; font-weight: 600; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+  .summary-box {
+    background: #fff; border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 12px 16px; margin-bottom: 12px; min-width: 260px;
+  }
+  .summary-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; padding: 4px 0;
+  }
+  .summary-row.total {
+    font-size: 16px; font-weight: 800; color: var(--primary);
+    border-top: 1.5px solid var(--border); margin-top: 6px; padding-top: 8px;
+  }
+  .summary-row input[type="number"] {
+    width: 90px; text-align: right; border: 1px solid var(--border); border-radius: 6px;
+    padding: 3px 6px; font-family: 'Sarabun', sans-serif; font-size: 13px;
+  }
+  .thai-text {
+    font-size: 12px; color: var(--muted); text-align: right; margin-top: 4px;
+    font-style: italic;
+  }
+  .vat-toggle {
+    display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer;
+  }
+  .vat-toggle input { width: 16px; height: 16px; }
+  @media print {
+    @page { size: A4; margin: 12mm; }
+    body { background: #fff !important; font-size: 12px; }
+    .topbar, .btn-add-row, .btn-del, .no-print { display: none !important; }
+    .wrapper { padding: 0 !important; max-width: 100%; }
+    .sig-date-input { display: none !important; }
+    .sig-date-display { display: block !important; }
+    .items-table thead th, .items-table tbody td {
+      border-color: #8a9bb0 !important;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    .items-table thead tr { background: #1a3c5e !important; }
+    .td-num { background: #eef3f8 !important; }
+    .item-detail-row { background: #f8fafc !important; }
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator { opacity: .5; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-title">📄 ใบเสนอ<span>ราคา</span></div>
+  <div class="topbar-actions">
+    <button class="btn btn-reset" onclick="resetForm()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+      ล้างข้อมูล
+    </button>
+    <button class="btn btn-pdf" id="pdfBtn" onclick="exportPDF()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Export PDF
+    </button>
+  </div>
+</div>
+
+<div class="wrapper" id="form-area">
+
+  <div class="doc-header" style="margin-bottom:4px">
+    <div class="doc-top">
+      <div style="width:50%; display:flex; flex-direction:column; gap:0">
+        <textarea id="companyNote" rows="1" placeholder="ชื่อบริษัท / ที่อยู่ (ผู้ออกใบเสนอราคา)"
+          oninput="autoResize(this); saveData()"
+          style="width:100%; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px 8px 0 0;
+                 font-family:'Sarabun',sans-serif; font-size:12px; color:var(--text);
+                 background:#fff; resize:none; overflow:hidden;"></textarea>
+        <div style="padding:8px 12px; background:#fff; border:1.5px solid var(--border); border-top:none; border-radius:0 0 8px 8px;">
+          <div style="font-size:11px; font-weight:700; color:var(--muted); margin-bottom:4px">ลูกค้า</div>
+          <textarea id="custName" rows="1" placeholder="กรอกชื่อลูกค้าหรือบริษัท"
+            oninput="autoResize(this); saveData()"
+            style="width:100%; border:none; background:transparent; resize:none; overflow:hidden;
+                   font-family:'Sarabun',sans-serif; font-size:12px; color:var(--text); padding:0;"></textarea>
+        </div>
+      </div>
+      <div class="doc-badge">
+        <div class="badge-title">ใบเสนอราคา</div>
+        <div style="margin-top:1.5em; display:flex; flex-direction:column; gap:4px">
+          <div style="display:flex; align-items:center; gap:6px">
+            <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">เลขที่</span>
+            <input type="text" id="docNo" oninput="saveData()" style="width:50%; margin-left:auto; font-size:11px; color:var(--text); border:none; background:transparent; font-family:'Sarabun',sans-serif; padding:1px 0;">
+          </div>
+          <div style="display:flex; align-items:center; gap:6px">
+            <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">วันที่</span>
+            <input type="date" id="docDate" onchange="saveData()" style="width:50%; margin-left:auto; font-size:11px; color:var(--text); border:none; background:transparent; font-family:'Sarabun',sans-serif; padding:0; -webkit-appearance:none;">
+          </div>
+          <div style="display:flex; align-items:center; gap:6px">
+            <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">กำหนดชำระ</span>
+            <input type="date" id="dueDate" onchange="saveData()" style="width:50%; margin-left:auto; font-size:11px; color:var(--text); border:none; background:transparent; font-family:'Sarabun',sans-serif; padding:0; -webkit-appearance:none;">
+          </div>
+          <div style="display:flex; align-items:center; gap:6px">
+            <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">ผู้ออก</span>
+            <input type="text" id="issuerName" oninput="saveData()" style="width:50%; margin-left:auto; font-size:11px; color:var(--text); border:none; background:transparent; font-family:'Sarabun',sans-serif; padding:1px 0;">
+          </div>
+          <div style="display:flex; align-items:center; gap:6px">
+            <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">อ้างอิง</span>
+            <input type="text" id="docRef" oninput="saveData()" style="width:50%; margin-left:auto; font-size:11px; color:var(--text); border:none; background:transparent; font-family:'Sarabun',sans-serif; padding:1px 0;">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom:14px">
+    <div class="items-wrapper">
+      <table class="items-table">
+        <colgroup>
+          <col class="col-num"><col class="col-desc"><col class="col-qty"><col class="col-price"><col class="col-total">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>ลำดับ</th>
+            <th>รายการ / รายละเอียด</th>
+            <th>จำนวน</th>
+            <th>ราคา/หน่วย</th>
+            <th>ราคารวม</th>
+          </tr>
+        </thead>
+        <tbody id="itemsBody"></tbody>
+      </table>
+    </div>
+    <div style="padding:8px 0 0" class="no-print">
+      <button class="btn-add-row" onclick="addRow()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        + เพิ่มรายการ
+      </button>
+    </div>
+  </div>
+
+  <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:12px; gap:16px; flex-wrap:wrap;">
+    <div style="display:flex; align-items:flex-start; gap:8px; flex:1; min-width:200px;">
+      <span style="font-size:13px; font-weight:700; color:#e05050; white-space:nowrap; padding-top:6px">หมายเหตุ</span>
+      <textarea id="remarks" rows="4" oninput="autoResize(this); saveData()"
+        style="width:100%; max-width:320px; font-size:13px; color:#1a2a3a;
+               border:1.5px solid var(--border); border-radius:6px;
+               padding:5px 8px; font-family:'Sarabun',sans-serif;
+               background:#fff; resize:none; overflow:hidden; line-height:1.5;"></textarea>
+    </div>
+
+    <div class="summary-box">
+      <div class="summary-row">
+        <span>ยอดรวมรายการ</span>
+        <span id="subTotalDisplay">0.00</span>
+      </div>
+      <div class="summary-row">
+        <span>ส่วนลด</span>
+        <input type="number" id="discount" min="0" step="0.01" value="0" oninput="calcTotal(); saveData()">
+      </div>
+      <div class="summary-row">
+        <span>ยอดหลังหักส่วนลด</span>
+        <span id="afterDiscountDisplay">0.00</span>
+      </div>
+      <div class="summary-row">
+        <label class="vat-toggle">
+          <input type="checkbox" id="vatToggle" onchange="calcTotal(); saveData()"> รวม VAT 7%
+        </label>
+        <span id="vatDisplay">0.00</span>
+      </div>
+      <div class="summary-row total">
+        <span>ยอดรวมทั้งสิ้น</span>
+        <span id="grandTotalDisplay">0.00 บาท</span>
+      </div>
+      <div class="thai-text" id="thaiTextDisplay">(ศูนย์บาทถ้วน)</div>
+    </div>
+  </div>
+
+  <div class="footer-bottom-row">
+    <div class="footer-bottom-right">
+      <div class="sig-inline">
+        <div class="sig-inline-title">ลายเซ็นผู้อนุมัติ</div>
+        <div class="sig-cols">
+          <div class="sig-col">
+            <div class="sig-col-label">ผู้เสนอราคา</div>
+            <div class="sig-space"></div>
+            <input class="sig-name-input" id="sigSeller" type="text" placeholder="ชื่อ - นามสกุล" oninput="saveData()">
+            <div class="sig-date-label">วันที่</div>
+            <input type="date" class="sig-date-input" id="sigSellerDate"
+              onchange="updateSigDate('sigSellerDate','sigSellerDateDisplay'); saveData()">
+            <div class="sig-date-display" id="sigSellerDateDisplay"></div>
+          </div>
+          <div class="sig-col">
+            <div class="sig-col-label">ผู้อนุมัติ / ลูกค้า</div>
+            <div class="sig-space"></div>
+            <input class="sig-name-input" id="sigBuyer" type="text" placeholder="ชื่อ - นามสกุล" oninput="saveData()">
+            <div class="sig-date-label">วันที่</div>
+            <input type="date" class="sig-date-input" id="sigBuyerDate"
+              onchange="updateSigDate('sigBuyerDate','sigBuyerDateDisplay'); saveData()">
+            <div class="sig-date-display" id="sigBuyerDateDisplay"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:8px 0 4px;font-size:11px;color:var(--muted)" class="no-print">
+    กด <strong>Export PDF</strong> ด้านบน เพื่อดาวน์โหลดไฟล์ PDF
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let rowCount = 0;
+  const thaiMonths = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+  function ThaiBahtText(num) {
+    if (num === null || num === undefined || isNaN(num)) return 'ศูนย์บาทถ้วน';
+    num = Math.round(Number(num) * 100) / 100;
+    if (num === 0) return 'ศูนย์บาทถ้วน';
+    const isNeg = num < 0;
+    num = Math.abs(num);
+    const baht = Math.floor(num);
+    const satang = Math.round((num - baht) * 100);
+    const digits = ['', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า'];
+
+    function readGroup(n) {
+      if (n === 0) return '';
+      let s = '';
+      const str = String(n).padStart(6, '0');
+      const vals = str.split('').map(Number);
+      if (vals[0]) s += digits[vals[0]] + 'แสน';
+      if (vals[1]) s += digits[vals[1]] + 'หมื่น';
+      if (vals[2]) s += digits[vals[2]] + 'พัน';
+      if (vals[3]) s += digits[vals[3]] + 'ร้อย';
+      if (vals[4] === 1) s += 'สิบ';
+      else if (vals[4] === 2) s += 'ยี่สิบ';
+      else if (vals[4] > 2) s += digits[vals[4]] + 'สิบ';
+      if (vals[5] === 1 && vals[4] > 0) s += 'เอ็ด';
+      else if (vals[5] === 1 && vals[4] === 0) s += 'หนึ่ง';
+      else if (vals[5] > 1) s += digits[vals[5]];
+      return s;
+    }
+
+    function readNumber(n) {
+      if (n === 0) return '';
+      let result = '';
+      const million = Math.floor(n / 1000000);
+      const rest = n % 1000000;
+      if (million > 0) result += readGroup(million) + 'ล้าน';
+      result += readGroup(rest);
+      return result;
+    }
+
+    let text = readNumber(baht) + 'บาท';
+    if (satang === 0) text += 'ถ้วน';
+    else text += readNumber(satang) + 'สตางค์';
+    return (isNeg ? 'ลบ' : '') + text;
+  }
+
+  function fmtThaiDate(val) {
+    if (!val) return '';
+    const [y, m, d] = val.split('-');
+    return `${parseInt(d)} ${thaiMonths[parseInt(m)-1]} ${parseInt(y)+543}`;
+  }
+
+  function updateSigDate(inputId, displayId) {
+    const val = document.getElementById(inputId)?.value || '';
+    const el = document.getElementById(displayId);
+    if (el) el.textContent = fmtThaiDate(val);
+  }
+
+  function fmt(n) {
+    return Number(n).toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  function showPriceInput(id) {
+    const row = document.getElementById('row-' + id);
+    if (!row) return;
+    const span = row.querySelector('.price-display');
+    const input = row.querySelector('.price-input');
+    span.style.display = 'none';
+    input.style.display = 'block';
+    input.focus();
+    input.select();
+  }
+
+  function formatPriceDisplay(id) {
+    const row = document.getElementById('row-' + id);
+    if (!row) return;
+    const input = row.querySelector('.price-input');
+    const span = row.querySelector('.price-display');
+    const raw = parseFloat(input.value) || 0;
+    span.textContent = raw.toLocaleString('en-US');
+  }
+
+  function hidePriceInput(id) {
+    formatPriceDisplay(id);
+    const row = document.getElementById('row-' + id);
+    if (!row) return;
+    row.querySelector('.price-input').style.display = 'none';
+    row.querySelector('.price-display').style.display = 'block';
+  }
+
+  function parsePriceInput(el) {
+    return parseFloat((el?.value || '').replace(/,/g, '').replace(/[^0-9.]/g, '')) || 0;
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+
+  function addRow() {
+    rowCount++;
+    const id = rowCount;
+    const body = document.getElementById('itemsBody');
+    const row = document.createElement('tr');
+    row.className = 'item-row';
+    row.id = 'row-' + id;
+    row.innerHTML = `
+      <td class="td-num" style="position:relative;">
+        <input class="item-num-input" type="text" value="${id}" oninput="saveData()">
+        <button class="btn-del no-print" onclick="delRow(${id})" title="ลบรายการ"
+          style="position:absolute;top:2px;right:2px;width:16px;height:16px;padding:0;display:flex;align-items:center;justify-content:center;">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </td>
+      <td class="td-desc">
+        <div class="item-desc-wrap">
+          <div class="item-name-row">
+            <input class="item-name" type="text" placeholder="ชื่อรายการ / สินค้า / บริการ" oninput="saveData()">
+          </div>
+          <div class="item-detail-row">
+            <textarea class="item-detail" rows="1" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)" oninput="autoResize(this); saveData()"></textarea>
+          </div>
+        </div>
+      </td>
+      <td class="td-num-val"><input class="item-input qty-input" type="number" min="0" value="1" inputmode="numeric" oninput="calcRow(${id}); saveData()"></td>
+      <td class="td-num-val">
+        <span class="item-input price-display" onclick="showPriceInput(${id})" style="cursor:text;">0</span>
+        <input class="item-input price-input" type="number" min="0" step="1" value="0" inputmode="numeric" style="display:none;" onblur="hidePriceInput(${id})" oninput="calcRow(${id}); saveData()">
+      </td>
+      <td class="td-num-val"><input class="item-total item-input" id="rt-${id}" type="text" inputmode="decimal" value="0.00" onclick="this.select()" oninput="calcTotal(); saveData()" onblur="formatTotalOnBlur(this); calcTotal(); saveData()" style="border-bottom:1px dashed #b8c8d8;cursor:text;"></td>
+    `;
+    body.appendChild(row);
+    calcTotal();
+  }
+
+  function formatTotalOnBlur(el) {
+    const raw = parseFloat((el?.value || '').replace(/,/g, '').replace(/[^0-9.]/g, '')) || 0;
+    el.value = fmt(raw);
+  }
+
+  function calcRow(id) {
+    const row = document.getElementById('row-' + id);
+    if (!row) return;
+    const qty = parseFloat(row.querySelector('.qty-input')?.value) || 0;
+    const price = parsePriceInput(row.querySelector('.price-input'));
+    document.getElementById('rt-' + id).value = fmt(qty * price);
+    calcTotal();
+  }
+
+  function calcTotal() {
+    let subTotal = 0;
+    document.querySelectorAll('.item-row').forEach(row => {
+      const rtInput = row.querySelector('.item-total');
+      const val = rtInput ? parseFloat(rtInput.value.replace(/[^0-9.-]/g,'')) || 0 : 0;
+      subTotal += val;
+    });
+    const discount = parseFloat(document.getElementById('discount')?.value) || 0;
+    const afterDiscount = Math.max(0, subTotal - discount);
+    const useVat = document.getElementById('vatToggle')?.checked;
+    const vat = useVat ? afterDiscount * 0.07 : 0;
+    const grand = afterDiscount + vat;
+
+    document.getElementById('subTotalDisplay').textContent = fmt(subTotal);
+    document.getElementById('afterDiscountDisplay').textContent = fmt(afterDiscount);
+    document.getElementById('vatDisplay').textContent = fmt(vat);
+    document.getElementById('grandTotalDisplay').textContent = fmt(grand) + ' บาท';
+    document.getElementById('thaiTextDisplay').textContent = '(' + ThaiBahtText(grand) + ')';
+  }
+
+  function delRow(id) {
+    document.getElementById('row-' + id)?.remove();
+    calcTotal();
+    saveData();
+  }
+
+  function gatherData() {
+    const rows = [];
+    document.querySelectorAll('.item-row').forEach(row => {
+      rows.push({
+        num: row.querySelector('.item-num-input')?.value || '',
+        name: row.querySelector('.item-name')?.value || '',
+        detail: row.querySelector('.item-detail')?.value || '',
+        qty: row.querySelector('.qty-input')?.value || '1',
+        price: String(parsePriceInput(row.querySelector('.price-input'))),
+        rowTotal: row.querySelector('.item-total')?.value || ''
+      });
+    });
+    return {
+      companyNote: document.getElementById('companyNote')?.value || '',
+      custName: document.getElementById('custName')?.value || '',
+      docNo: document.getElementById('docNo')?.value || '',
+      docDate: document.getElementById('docDate')?.value || '',
+      dueDate: document.getElementById('dueDate')?.value || '',
+      issuerName: document.getElementById('issuerName')?.value || '',
+      docRef: document.getElementById('docRef')?.value || '',
+      remarks: document.getElementById('remarks')?.value || '',
+      discount: document.getElementById('discount')?.value || '0',
+      vatToggle: document.getElementById('vatToggle')?.checked || false,
+      sigSeller: document.getElementById('sigSeller')?.value || '',
+      sigSellerDate: document.getElementById('sigSellerDate')?.value || '',
+      sigBuyer: document.getElementById('sigBuyer')?.value || '',
+      sigBuyerDate: document.getElementById('sigBuyerDate')?.value || '',
+      rows
+    };
+  }
+
+  function saveData() {
+    try { localStorage.setItem('quo_data', JSON.stringify(gatherData())); } catch(e) {}
+  }
+
+  function loadData() {
+    let raw;
+    try { raw = localStorage.getItem('quo_data'); } catch(e) {}
+    if (!raw) {
+      addRow(); addRow(); addRow();
+      const now = new Date();
+      document.getElementById('docDate').value = now.toISOString().slice(0,10);
+      calcTotal();
+      return;
+    }
+    try {
+      const d = JSON.parse(raw);
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+      set('companyNote', d.companyNote);
+      set('custName', d.custName);
+      set('docNo', d.docNo);
+      set('docDate', d.docDate);
+      set('dueDate', d.dueDate);
+      set('issuerName', d.issuerName);
+      set('docRef', d.docRef);
+      set('remarks', d.remarks);
+      set('discount', d.discount || '0');
+      if (document.getElementById('vatToggle')) document.getElementById('vatToggle').checked = !!d.vatToggle;
+      set('sigSeller', d.sigSeller);
+      set('sigSellerDate', d.sigSellerDate);
+      set('sigBuyer', d.sigBuyer);
+      set('sigBuyerDate', d.sigBuyerDate);
+      updateSigDate('sigSellerDate','sigSellerDateDisplay');
+      updateSigDate('sigBuyerDate','sigBuyerDateDisplay');
+
+      if (d.rows && d.rows.length > 0) {
+        d.rows.forEach(r => {
+          addRow();
+          const id = rowCount;
+          const row = document.getElementById('row-' + id);
+          if (row.querySelector('.item-num-input')) row.querySelector('.item-num-input').value = r.num || String(id);
+          row.querySelector('.item-name').value = r.name || '';
+          const detail = row.querySelector('.item-detail');
+          detail.value = r.detail || '';
+          autoResize(detail);
+          row.querySelector('.qty-input').value = r.qty || '1';
+          row.querySelector('.price-input').value = String(r.price || '0').replace(/[^0-9.]/g, '');
+          formatPriceDisplay(id);
+          calcRow(id);
+          if (r.rowTotal) {
+            const rt = document.getElementById('rt-' + id);
+            if (rt) rt.value = r.rowTotal;
+          }
+        });
+      } else {
+        addRow(); addRow(); addRow();
+      }
+      calcTotal();
+    } catch(e) {
+      addRow(); addRow(); addRow();
+      calcTotal();
+    }
+  }
+
+  function resetForm() {
+    if (!confirm('ล้างข้อมูลทั้งหมดใช่ไหม?')) return;
+    try { localStorage.removeItem('quo_data'); } catch(e) {}
+    document.getElementById('itemsBody').innerHTML = '';
+    rowCount = 0;
+    ['companyNote','custName','docNo','docDate','dueDate','issuerName','docRef','remarks',
+     'sigSeller','sigSellerDate','sigBuyer','sigBuyerDate'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    document.getElementById('discount').value = '0';
+    document.getElementById('vatToggle').checked = false;
+    const now = new Date();
+    document.getElementById('docDate').value = now.toISOString().slice(0,10);
+    addRow(); addRow(); addRow();
+    calcTotal();
+    showToast('ล้างข้อมูลแล้ว ✓');
+  }
+
+  async function exportPDF() {
+    const btn = document.getElementById('pdfBtn');
+    btn.disabled = true;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> กำลังสร้าง...`;
+
+    const element = document.getElementById('form-area');
+    const note = (document.getElementById('companyNote')?.value || 'ใบเสนอราคา').slice(0, 30).replace(/[\\/:*?"<>|]/g, '');
+    const filename = `${note || 'ใบเสนอราคา'}_${new Date().toISOString().slice(0,10)}.pdf`;
+
+    const opt = {
+      margin: [8, 8, 8, 8],
+      filename,
+      image: { type: 'jpeg', quality: 0.97 },
+      html2canvas: { scale: 2, useCORS: true, logging: false },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+
+    document.querySelectorAll('.no-print').forEach(el => el.style.display = 'none');
+    try {
+      await html2pdf().set(opt).from(element).save();
+      showToast('ดาวน์โหลด PDF เรียบร้อย ✓');
+    } catch(e) {
+      showToast('เกิดข้อผิดพลาด กรุณาลองใหม่');
+    }
+    document.querySelectorAll('.no-print').forEach(el => el.style.display = '');
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Export PDF`;
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  loadData();
+</script>
 </body>
 </html>
