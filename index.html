@@ -210,6 +210,16 @@
     .wrapper { padding: 0 !important; max-width: 100%; }
     .sig-date-input { display: none !important; }
     .sig-date-display { display: block !important; }
+    /* บังคับให้คำว่า "ใบเสนอราคา" แสดงเป็นสีน้ำเงินตอนพิมพ์ / PDF */
+    .badge-title {
+      background: none !important;
+      -webkit-background-clip: unset !important;
+      background-clip: unset !important;
+      -webkit-text-fill-color: #1a3c5e !important;
+      color: #1a3c5e !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
     .items-table thead th, .items-table tbody td {
       border-color: #8a9bb0 !important;
       -webkit-print-color-adjust: exact; print-color-adjust: exact;
@@ -692,11 +702,25 @@
     };
 
     document.querySelectorAll('.no-print').forEach(el => el.style.display = 'none');
+    // บังคับสีตัวอักษร "ใบเสนอราคา" ให้แสดงใน PDF (html2canvas ไม่รองรับ background-clip text ดี)
+    const badge = document.querySelector('.badge-title');
+    const prevBadgeStyle = badge ? badge.getAttribute('style') : null;
+    if (badge) {
+      badge.style.background = 'none';
+      badge.style.webkitBackgroundClip = 'unset';
+      badge.style.backgroundClip = 'unset';
+      badge.style.webkitTextFillColor = '#1a3c5e';
+      badge.style.color = '#1a3c5e';
+    }
     try {
       await html2pdf().set(opt).from(element).save();
       showToast('ดาวน์โหลด PDF เรียบร้อย ✓');
     } catch(e) {
       showToast('เกิดข้อผิดพลาด กรุณาลองใหม่');
+    }
+    if (badge) {
+      if (prevBadgeStyle !== null) badge.setAttribute('style', prevBadgeStyle);
+      else badge.removeAttribute('style');
     }
     document.querySelectorAll('.no-print').forEach(el => el.style.display = '');
     btn.disabled = false;
