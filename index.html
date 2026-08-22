@@ -138,7 +138,7 @@
   }
   .btn-add-row:hover { background: #e8eef5; color: var(--primary); }
   .sig-inline {
-    background: #fff; border-radius: 8px; border: 1.5px solid var(--border); padding: 16px 14px 14px;
+    background: transparent; border-radius: 0; border: none; padding: 8px 0 0;
   }
   .sig-inline-title {
     font-size: 10px; font-weight: 800; color: var(--primary);
@@ -169,10 +169,10 @@
   .sig-date-input:focus { outline: none; border-bottom-color: var(--primary); }
   .sig-date-display { font-size: 11px; color: var(--primary); font-weight: 600; text-align: center; margin-top: 3px; min-height: 16px; }
   .footer-bottom-row {
-    display: grid; grid-template-columns: 1fr; gap: 0; border-radius: 0 0 14px 14px; overflow: hidden;
-    border: 1.5px solid var(--border); margin-bottom: 14px;
+    display: grid; grid-template-columns: 1fr; gap: 0; border-radius: 0; overflow: visible;
+    border: none; margin-bottom: 14px;
   }
-  .footer-bottom-right { padding: 16px 18px; background: #fff; }
+  .footer-bottom-right { padding: 8px 0; background: transparent; }
   .toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
     background: #1a2a3a; color: #fff; padding: 10px 22px; border-radius: 30px;
@@ -180,8 +180,8 @@
   }
   .toast.show { opacity: 1; }
   .summary-box {
-    background: #fff; border: 1.5px solid var(--border); border-radius: 10px;
-    padding: 12px 16px; margin-bottom: 12px; min-width: 260px;
+    background: transparent; border: none; border-radius: 0;
+    padding: 4px 0; margin-bottom: 8px; min-width: 260px;
   }
   .summary-row {
     display: flex; justify-content: space-between; align-items: center;
@@ -189,7 +189,7 @@
   }
   .summary-row.total {
     font-size: 16px; font-weight: 800; color: var(--primary);
-    border-top: 1.5px solid var(--border); margin-top: 6px; padding-top: 8px;
+    border-top: 1px solid var(--border); margin-top: 6px; padding-top: 8px;
   }
   .summary-row input[type="number"] {
     width: 90px; text-align: right; border: 1px solid var(--border); border-radius: 6px;
@@ -203,6 +203,27 @@
     display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer;
   }
   .vat-toggle input { width: 16px; height: 16px; }
+  /* Summary visibility widget */
+  .summary-settings-btn {
+    border: none; background: rgba(255,255,255,.15); color: #fff;
+    padding: 8px 12px; border-radius: 8px; font-family: 'Sarabun', sans-serif;
+    font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;
+  }
+  .summary-settings-btn:hover { background: rgba(255,255,255,.25); }
+  .summary-widget {
+    display: none; position: absolute; top: 48px; right: 12px; z-index: 200;
+    background: #fff; border: 1.5px solid var(--border); border-radius: 12px;
+    box-shadow: 0 8px 28px rgba(26,60,94,.18); padding: 14px 16px; min-width: 220px;
+  }
+  .summary-widget.show { display: block; }
+  .summary-widget h4 {
+    font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 10px;
+  }
+  .summary-widget label {
+    display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 5px 0;
+    cursor: pointer; color: var(--text);
+  }
+  .summary-widget input[type="checkbox"] { width: 16px; height: 16px; }
   @media print {
     @page { size: A4; margin: 12mm; }
     body { background: #fff !important; font-size: 12px; }
@@ -235,7 +256,18 @@
 
 <div class="topbar">
   <div class="topbar-title">📄 ใบเสนอ<span>ราคา</span></div>
-  <div class="topbar-actions">
+  <div class="topbar-actions" style="position:relative;">
+    <button class="summary-settings-btn no-print" onclick="toggleSummaryWidget(event)" title="ตั้งค่ายอดสรุป">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      ยอดสรุป
+    </button>
+    <div class="summary-widget no-print" id="summaryWidget">
+      <h4>แสดงในยอดสรุป</h4>
+      <label><input type="checkbox" id="showSubTotal" checked onchange="applySummaryVisibility(); saveData()"> ยอดรวมรายการ</label>
+      <label><input type="checkbox" id="showDiscount" checked onchange="applySummaryVisibility(); saveData()"> ส่วนลด</label>
+      <label><input type="checkbox" id="showAfterDiscount" checked onchange="applySummaryVisibility(); saveData()"> ยอดหลังหักส่วนลด</label>
+      <label><input type="checkbox" id="showVat" checked onchange="applySummaryVisibility(); saveData()"> รวม VAT 7%</label>
+    </div>
     <button class="btn btn-reset" onclick="resetForm()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
       ล้างข้อมูล
@@ -251,18 +283,18 @@
 
   <div class="doc-header" style="margin-bottom:4px">
     <div class="doc-top">
-      <div style="width:50%; display:flex; flex-direction:column; gap:0">
+      <div style="width:50%; display:flex; flex-direction:column; gap:4px">
         <textarea id="companyNote" rows="1" placeholder="ชื่อบริษัท / ที่อยู่ (ผู้ออกใบเสนอราคา)"
           oninput="autoResize(this); saveData()"
-          style="width:100%; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px 8px 0 0;
+          style="width:100%; padding:6px 0; border:none; border-bottom:1px dashed var(--border);
                  font-family:'Sarabun',sans-serif; font-size:12px; color:var(--text);
-                 background:#fff; resize:none; overflow:hidden;"></textarea>
-        <div style="padding:8px 12px; background:#fff; border:1.5px solid var(--border); border-top:none; border-radius:0 0 8px 8px;">
-          <div style="font-size:11px; font-weight:700; color:var(--muted); margin-bottom:4px">ลูกค้า</div>
+                 background:transparent; resize:none; overflow:hidden;"></textarea>
+        <div style="padding:4px 0;">
+          <div style="font-size:11px; font-weight:700; color:var(--muted); margin-bottom:2px">ลูกค้า</div>
           <textarea id="custName" rows="1" placeholder="กรอกชื่อลูกค้าหรือบริษัท"
             oninput="autoResize(this); saveData()"
-            style="width:100%; border:none; background:transparent; resize:none; overflow:hidden;
-                   font-family:'Sarabun',sans-serif; font-size:12px; color:var(--text); padding:0;"></textarea>
+            style="width:100%; border:none; border-bottom:1px dashed var(--border); background:transparent; resize:none; overflow:hidden;
+                   font-family:'Sarabun',sans-serif; font-size:12px; color:var(--text); padding:4px 0;"></textarea>
         </div>
       </div>
       <div class="doc-badge">
@@ -324,25 +356,25 @@
       <span style="font-size:13px; font-weight:700; color:#e05050; white-space:nowrap; padding-top:6px">หมายเหตุ</span>
       <textarea id="remarks" rows="4" oninput="autoResize(this); saveData()"
         style="width:100%; max-width:320px; font-size:13px; color:#1a2a3a;
-               border:1.5px solid var(--border); border-radius:6px;
-               padding:5px 8px; font-family:'Sarabun',sans-serif;
-               background:#fff; resize:none; overflow:hidden; line-height:1.5;"></textarea>
+               border:none; border-bottom:1px dashed var(--border); border-radius:0;
+               padding:5px 0; font-family:'Sarabun',sans-serif;
+               background:transparent; resize:none; overflow:hidden; line-height:1.5;"></textarea>
     </div>
 
     <div class="summary-box">
-      <div class="summary-row">
+      <div class="summary-row" id="rowSubTotal">
         <span>ยอดรวมรายการ</span>
         <span id="subTotalDisplay">0.00</span>
       </div>
-      <div class="summary-row">
+      <div class="summary-row" id="rowDiscount">
         <span>ส่วนลด</span>
         <input type="number" id="discount" min="0" step="0.01" value="0" oninput="calcTotal(); saveData()">
       </div>
-      <div class="summary-row">
+      <div class="summary-row" id="rowAfterDiscount">
         <span>ยอดหลังหักส่วนลด</span>
         <span id="afterDiscountDisplay">0.00</span>
       </div>
-      <div class="summary-row">
+      <div class="summary-row" id="rowVat">
         <label class="vat-toggle">
           <input type="checkbox" id="vatToggle" onchange="calcTotal(); saveData()"> รวม VAT 7%
         </label>
@@ -570,6 +602,32 @@
     saveData();
   }
 
+  function toggleSummaryWidget(e) {
+    e.stopPropagation();
+    const w = document.getElementById('summaryWidget');
+    w.classList.toggle('show');
+  }
+  document.addEventListener('click', (e) => {
+    const w = document.getElementById('summaryWidget');
+    if (w && w.classList.contains('show') && !w.contains(e.target) && !e.target.closest('.summary-settings-btn')) {
+      w.classList.remove('show');
+    }
+  });
+
+  function applySummaryVisibility() {
+    const map = [
+      ['showSubTotal', 'rowSubTotal'],
+      ['showDiscount', 'rowDiscount'],
+      ['showAfterDiscount', 'rowAfterDiscount'],
+      ['showVat', 'rowVat']
+    ];
+    map.forEach(([cbId, rowId]) => {
+      const cb = document.getElementById(cbId);
+      const row = document.getElementById(rowId);
+      if (cb && row) row.style.display = cb.checked ? '' : 'none';
+    });
+  }
+
   function gatherData() {
     const rows = [];
     document.querySelectorAll('.item-row').forEach(row => {
@@ -593,6 +651,10 @@
       remarks: document.getElementById('remarks')?.value || '',
       discount: document.getElementById('discount')?.value || '0',
       vatToggle: document.getElementById('vatToggle')?.checked || false,
+      showSubTotal: document.getElementById('showSubTotal')?.checked !== false,
+      showDiscount: document.getElementById('showDiscount')?.checked !== false,
+      showAfterDiscount: document.getElementById('showAfterDiscount')?.checked !== false,
+      showVat: document.getElementById('showVat')?.checked !== false,
       sigSeller: document.getElementById('sigSeller')?.value || '',
       sigSellerDate: document.getElementById('sigSellerDate')?.value || '',
       sigBuyer: document.getElementById('sigBuyer')?.value || '',
@@ -628,6 +690,12 @@
       set('remarks', d.remarks);
       set('discount', d.discount || '0');
       if (document.getElementById('vatToggle')) document.getElementById('vatToggle').checked = !!d.vatToggle;
+      // restore summary visibility
+      ['showSubTotal','showDiscount','showAfterDiscount','showVat'].forEach(k => {
+        const el = document.getElementById(k);
+        if (el) el.checked = d[k] !== false;
+      });
+      applySummaryVisibility();
       set('sigSeller', d.sigSeller);
       set('sigSellerDate', d.sigSellerDate);
       set('sigBuyer', d.sigBuyer);
@@ -735,6 +803,7 @@
   }
 
   loadData();
+  applySummaryVisibility();
 </script>
 </body>
 </html>
