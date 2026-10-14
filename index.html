@@ -52,7 +52,7 @@
     background: transparent; padding: 0 0 10px;
     display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
   }
-  .doc-badge { flex-shrink: 0; text-align: right; }
+  .doc-badge { flex-shrink: 0; width: 250px; max-width: 45%; padding-right: 4px; text-align: right; }
   .badge-title {
     font-size: 17px; font-weight: 800; letter-spacing: 1px; white-space: nowrap;
     background: linear-gradient(to right, #0D4067, #125A8B);
@@ -71,7 +71,7 @@
   .items-table .col-total { width: 98px; }
   .items-table thead th {
     background: #1a3c5e; color: #ffffff; font-size: 12px; font-weight: 700;
-    letter-spacing: .4px; padding: 7px 8px; text-align: center;
+    letter-spacing: 0; padding: 7px 8px; text-align: center;
     border-right: 1px solid #2e5580; border-bottom: 2px solid #8a9bb0;
     white-space: nowrap; vertical-align: middle;
   }
@@ -96,9 +96,9 @@
   .item-desc-wrap { display: flex; flex-direction: column; }
   .item-name-row { padding: 5px 8px 4px; border-bottom: 1px solid #d0dce8; }
   .item-name {
-    display: block; width: 100%; border: none; padding: 0;
+    display: block; width: 100%; min-height: 24px; border: none; padding: 2px 3px;
     font-family: 'Sarabun', sans-serif; font-size: 13px; font-weight: 600; color: var(--text);
-    background: transparent;
+    line-height: 1.55; background: transparent;
   }
   .item-name::placeholder { font-weight: 400; color: #a0b4c8; }
   .item-name:focus { outline: 2px solid #4a90d9; outline-offset: 1px; }
@@ -112,10 +112,10 @@
   .item-detail:focus { outline: 2px solid #4a90d9; outline-offset: 1px; }
   .td-num-val { padding: 5px 8px !important; vertical-align: top; text-align: right; }
   .item-input {
-    display: block; width: 100%; border: none; padding: 0;
+    display: block; width: 100%; min-height: 24px; border: none; padding: 2px 4px;
     font-family: 'Sarabun', sans-serif; font-size: 13px; color: var(--text);
     font-variant-numeric: tabular-nums; font-feature-settings: "tnum";
-    text-align: right; background: transparent;
+    line-height: 1.55; text-align: right; background: transparent;
   }
   .item-input:focus { outline: 2px solid #4a90d9; outline-offset: -2px; }
   .unit-input { text-align: center; }
@@ -144,14 +144,14 @@
   }
   .sig-inline-title {
     font-size: 10px; font-weight: 800; color: var(--primary);
-    text-transform: uppercase; letter-spacing: .7px; text-align: center; margin-bottom: 14px;
+    text-transform: uppercase; letter-spacing: 0; text-align: center; margin-bottom: 14px;
     padding-bottom: 8px; border-bottom: 1px solid var(--border);
   }
   .sig-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .sig-col { text-align: center; }
   .sig-col-label {
     font-size: 10px; color: var(--muted); font-weight: 700;
-    text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px;
+    text-transform: uppercase; letter-spacing: 0; margin-bottom: 6px;
   }
   .sig-space { height: 44px; border-bottom: 1.5px solid var(--text); margin-bottom: 8px; opacity: .25; }
   .sig-name-input {
@@ -160,7 +160,7 @@
     width: 100%; background: transparent; color: var(--text); padding: 3px 0;
   }
   .sig-name-input:focus { outline: none; border-bottom-color: var(--primary); }
-  .sig-date-label { font-size: 10px; color: var(--muted); margin-top: 6px; font-weight: 600; letter-spacing: .3px; }
+  .sig-date-label { font-size: 10px; color: var(--muted); margin-top: 6px; font-weight: 600; letter-spacing: 0; }
   .sig-date-control { width: 100%; margin-top: 3px; }
   .sig-date-control .date-value { text-align: center; color: var(--primary); font-weight: 600; }
   .footer-bottom-row {
@@ -176,15 +176,16 @@
   .toast.show { opacity: 1; }
   .summary-box {
     background: transparent; border: none; border-radius: 0;
-    padding: 4px 0; margin-bottom: 8px; min-width: 260px;
+    padding: 4px 2px 4px 0; margin-bottom: 8px; min-width: 330px;
   }
   .summary-row {
-    display: flex; justify-content: space-between; align-items: center;
-    font-size: 13px; padding: 4px 0;
+    display: flex; justify-content: space-between; align-items: center; gap: 14px;
+    font-size: 13px; line-height: 1.55; padding: 4px 0;
   }
+  .summary-row > :last-child { flex-shrink: 0; margin-left: auto; }
   .summary-row.total {
     font-size: 16px; font-weight: 800; color: var(--primary);
-    border-top: 1px solid var(--border); margin-top: 6px; padding-top: 8px;
+    border-top: 1px solid var(--border); margin-top: 6px; padding-top: 8px; white-space: nowrap;
   }
   .summary-row input[type="number"] {
     width: 90px; text-align: right; border: 1px solid var(--border); border-radius: 6px;
@@ -222,7 +223,7 @@
   .date-clear:hover { color: var(--danger); }
   .date-clear.hidden { visibility: hidden; }
   .thai-text {
-    font-size: 12px; color: var(--muted); text-align: right; margin-top: 4px;
+    font-size: 12px; color: var(--muted); text-align: right; margin-top: 4px; padding-right: 2px;
     font-style: italic;
   }
   .vat-toggle {
@@ -331,7 +332,7 @@
           <div style="display:flex; align-items:center; gap:6px">
             <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">เลขที่</span>
             <input type="text" id="docNo" value="QT-2026-0001" oninput="saveData()" onclick="this.select()"
-              style="width:58%; margin-left:auto; border:none; background:transparent; font-size:11px; color:var(--text); font-family:'Sarabun',sans-serif; padding:1px 0; text-align:left;">
+              style="width:68%; margin-left:auto; border:none; background:transparent; font-size:11px; line-height:1.6; color:var(--text); font-family:'Sarabun',sans-serif; padding:2px 5px; text-align:left;">
           </div>
           <div style="display:flex; align-items:center; gap:6px">
             <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">วันที่</span>
@@ -351,12 +352,12 @@
           </div>
           <div style="display:flex; align-items:center; gap:6px">
             <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">ผู้ออก</span>
-            <input type="text" id="issuerName" oninput="saveData()" style="width:50%; margin-left:auto; font-size:11px; color:var(--text); border:none; background:transparent; font-family:'Sarabun',sans-serif; padding:1px 0;">
+            <input type="text" id="issuerName" oninput="saveData()" style="width:68%; margin-left:auto; font-size:11px; line-height:1.6; color:var(--text); border:none; background:transparent; font-family:'Sarabun',sans-serif; padding:2px 5px;">
           </div>
           <div style="display:flex; align-items:center; gap:6px">
             <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">อ้างอิง</span>
             <input type="text" id="docRef" placeholder="PO / RFQ" oninput="saveData()"
-              style="width:50%; margin-left:auto; border:none; background:transparent; font-size:11px; color:var(--text); font-family:'Sarabun',sans-serif; padding:1px 0; text-align:left;">
+              style="width:68%; margin-left:auto; border:none; background:transparent; font-size:11px; line-height:1.6; color:var(--text); font-family:'Sarabun',sans-serif; padding:2px 5px; text-align:left;">
           </div>
         </div>
       </div>
