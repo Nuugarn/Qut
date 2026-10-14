@@ -65,9 +65,10 @@
   }
   .items-table .col-num   { width: 42px; }
   .items-table .col-desc  { width: auto; }
-  .items-table .col-qty   { width: 62px; }
-  .items-table .col-price { width: 108px; }
-  .items-table .col-total { width: 108px; }
+  .items-table .col-qty   { width: 56px; }
+  .items-table .col-unit  { width: 62px; }
+  .items-table .col-price { width: 98px; }
+  .items-table .col-total { width: 98px; }
   .items-table thead th {
     background: #1a3c5e; color: #ffffff; font-size: 12px; font-weight: 700;
     letter-spacing: .4px; padding: 7px 8px; text-align: center;
@@ -117,6 +118,7 @@
     text-align: right; background: transparent;
   }
   .item-input:focus { outline: 2px solid #4a90d9; outline-offset: -2px; }
+  .unit-input { text-align: center; }
   .price-input::-webkit-outer-spin-button,
   .price-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .price-input { -moz-appearance: textfield; }
@@ -159,15 +161,8 @@
   }
   .sig-name-input:focus { outline: none; border-bottom-color: var(--primary); }
   .sig-date-label { font-size: 10px; color: var(--muted); margin-top: 6px; font-weight: 600; letter-spacing: .3px; }
-  .sig-date-input {
-    border: none; border-bottom: 1px dashed var(--border);
-    font-family: 'Sarabun', sans-serif; font-size: 11px; text-align: center;
-    width: 100%; background: transparent; color: var(--text); padding: 2px 0; margin-top: 3px;
-    -webkit-appearance: none;
-  }
-  .sig-date-input::-webkit-calendar-picker-indicator { opacity: .5; cursor: pointer; }
-  .sig-date-input:focus { outline: none; border-bottom-color: var(--primary); }
-  .sig-date-display { font-size: 11px; color: var(--primary); font-weight: 600; text-align: center; margin-top: 3px; min-height: 16px; }
+  .sig-date-control { width: 100%; margin-top: 3px; }
+  .sig-date-control .date-value { text-align: center; color: var(--primary); font-weight: 600; }
   .footer-bottom-row {
     display: grid; grid-template-columns: 1fr; gap: 0; border-radius: 0; overflow: visible;
     border: none; margin-bottom: 14px;
@@ -195,6 +190,37 @@
     width: 90px; text-align: right; border: 1px solid var(--border); border-radius: 6px;
     padding: 3px 6px; font-family: 'Sarabun', sans-serif; font-size: 13px;
   }
+  .summary-row input.wht-rate-input {
+    width: 48px; padding: 2px 4px; margin: 0 2px; text-align: center;
+  }
+  .extra-cost-input {
+    width: 100px !important; background: #fff; color: var(--text);
+  }
+  .doc-date-field {
+    width: 58%; margin-left: auto;
+  }
+  .date-control {
+    position: relative; display: flex; align-items: center; gap: 3px;
+    min-height: 24px; font-family: 'Sarabun', sans-serif;
+  }
+  .date-value {
+    flex: 1; min-width: 0; min-height: 22px; padding: 1px 0;
+    border: none; border-bottom: 1px dashed var(--border); background: transparent;
+    font-family: 'Sarabun', sans-serif; font-size: 11px; color: var(--text);
+    text-align: left; white-space: nowrap; cursor: pointer;
+  }
+  .date-value:focus { outline: none; border-bottom-color: var(--primary); }
+  .date-native {
+    position: absolute; right: 20px; bottom: 0; width: 1px; height: 1px;
+    padding: 0; border: 0; opacity: 0; pointer-events: none;
+  }
+  .date-clear {
+    flex: 0 0 18px; width: 18px; height: 18px; padding: 0; border: none;
+    background: transparent; color: var(--muted); font: 16px/18px Arial, sans-serif;
+    text-align: center; cursor: pointer;
+  }
+  .date-clear:hover { color: var(--danger); }
+  .date-clear.hidden { visibility: hidden; }
   .thai-text {
     font-size: 12px; color: var(--muted); text-align: right; margin-top: 4px;
     font-style: italic;
@@ -229,8 +255,11 @@
     body { background: #fff !important; font-size: 12px; }
     .topbar, .btn-add-row, .btn-del, .no-print { display: none !important; }
     .wrapper { padding: 0 !important; max-width: 100%; }
-    .sig-date-input { display: none !important; }
-    .sig-date-display { display: block !important; }
+    .date-native, .date-clear { display: none !important; }
+    .date-value { border-bottom: none !important; color: var(--text) !important; }
+    .summary-row input[type="number"] {
+      border: none !important; background: transparent !important; appearance: textfield;
+    }
     /* บังคับให้คำว่า "ใบเสนอราคา" แสดงเป็นสีน้ำเงินตอนพิมพ์ / PDF */
     .badge-title {
       background: none !important;
@@ -263,8 +292,8 @@
     </button>
     <div class="summary-widget no-print" id="summaryWidget">
       <h4>แสดงในยอดสรุป</h4>
-      <label><input type="checkbox" id="showSubTotal" checked onchange="applySummaryVisibility(); saveData()"> ยอดรวมรายการ</label>
-      <label><input type="checkbox" id="showWht" checked onchange="applySummaryVisibility(); saveData()"> หักภาษี ณ ที่จ่าย 3%</label>
+      <label><input type="checkbox" id="showSubTotal" checked onchange="applySummaryVisibility(); saveData()"> รวมราคาสินค้า/บริการ</label>
+      <label><input type="checkbox" id="showWht" checked onchange="applySummaryVisibility(); saveData()"> หัก ณ ที่จ่าย</label>
       <label><input type="checkbox" id="showVat" checked onchange="applySummaryVisibility(); saveData()"> รวม VAT 7%</label>
     </div>
     <button class="btn btn-reset" onclick="resetForm()">
@@ -301,20 +330,24 @@
         <div style="margin-top:1.5em; display:flex; flex-direction:column; gap:4px">
           <div style="display:flex; align-items:center; gap:6px">
             <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">เลขที่</span>
-            <div style="width:50%; margin-left:auto; display:flex; align-items:center; justify-content:flex-start; font-size:11px; color:var(--text); font-family:'Sarabun',sans-serif;">
-              <span style="user-select:none; pointer-events:none; font-weight:400; flex-shrink:0;">QS-</span>
-              <input type="text" id="docNoNum" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="000"
-                oninput="onCodeInput(this)" onblur="padCode(this)" onclick="this.select()"
-                style="width:2.2em; border:none; background:transparent; font-size:11px; color:var(--text); font-family:'Sarabun',sans-serif; padding:1px 0; text-align:left;">
-            </div>
+            <input type="text" id="docNo" value="QT-2026-0001" oninput="saveData()" onclick="this.select()"
+              style="width:58%; margin-left:auto; border:none; background:transparent; font-size:11px; color:var(--text); font-family:'Sarabun',sans-serif; padding:1px 0; text-align:left;">
           </div>
           <div style="display:flex; align-items:center; gap:6px">
             <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">วันที่</span>
-            <input type="date" id="docDate" onchange="saveData()" style="width:50%; margin-left:auto; font-size:11px; color:var(--text); border:none; background:transparent; font-family:'Sarabun',sans-serif; padding:0; -webkit-appearance:none;">
+            <div class="date-control doc-date-field">
+              <button type="button" class="date-value" onclick="openDatePicker('docDate')" aria-label="เลือกวันที่เอกสาร"><span id="docDateDisplay"></span></button>
+              <input class="date-native" type="date" id="docDate" onchange="updateDocDate('docDate','docDateDisplay'); saveData()">
+              <button type="button" class="date-clear no-print hidden" id="docDateClear" onclick="clearDate('docDate','docDateDisplay')" aria-label="ล้างวันที่เอกสาร" title="ล้างวันที่">×</button>
+            </div>
           </div>
           <div style="display:flex; align-items:center; gap:6px">
-            <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">กำหนดชำระ</span>
-            <input type="date" id="dueDate" onchange="saveData()" style="width:50%; margin-left:auto; font-size:11px; color:var(--text); border:none; background:transparent; font-family:'Sarabun',sans-serif; padding:0; -webkit-appearance:none;">
+            <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">ราคายืนถึง</span>
+            <div class="date-control doc-date-field">
+              <button type="button" class="date-value" onclick="openDatePicker('dueDate')" aria-label="เลือกราคายืนถึง"><span id="dueDateDisplay"></span></button>
+              <input class="date-native" type="date" id="dueDate" onchange="updateDocDate('dueDate','dueDateDisplay'); saveData()">
+              <button type="button" class="date-clear no-print hidden" id="dueDateClear" onclick="clearDate('dueDate','dueDateDisplay')" aria-label="ล้างราคายืนถึง" title="ล้างวันที่">×</button>
+            </div>
           </div>
           <div style="display:flex; align-items:center; gap:6px">
             <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">ผู้ออก</span>
@@ -322,12 +355,8 @@
           </div>
           <div style="display:flex; align-items:center; gap:6px">
             <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">อ้างอิง</span>
-            <div style="width:50%; margin-left:auto; display:flex; align-items:center; justify-content:flex-start; font-size:11px; color:var(--text); font-family:'Sarabun',sans-serif;">
-              <span style="user-select:none; pointer-events:none; font-weight:400; flex-shrink:0;">BS-</span>
-              <input type="text" id="docRefNum" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="000"
-                oninput="onCodeInput(this)" onblur="padCode(this)" onclick="this.select()"
-                style="width:2.2em; border:none; background:transparent; font-size:11px; color:var(--text); font-family:'Sarabun',sans-serif; padding:1px 0; text-align:left;">
-            </div>
+            <input type="text" id="docRef" placeholder="PO / RFQ" oninput="saveData()"
+              style="width:50%; margin-left:auto; border:none; background:transparent; font-size:11px; color:var(--text); font-family:'Sarabun',sans-serif; padding:1px 0; text-align:left;">
           </div>
         </div>
       </div>
@@ -338,13 +367,14 @@
     <div class="items-wrapper">
       <table class="items-table">
         <colgroup>
-          <col class="col-num"><col class="col-desc"><col class="col-qty"><col class="col-price"><col class="col-total">
+          <col class="col-num"><col class="col-desc"><col class="col-qty"><col class="col-unit"><col class="col-price"><col class="col-total">
         </colgroup>
         <thead>
           <tr>
             <th>ลำดับ</th>
             <th>รายการ / รายละเอียด</th>
             <th>จำนวน</th>
+            <th>หน่วย</th>
             <th>ราคา/หน่วย</th>
             <th>ราคารวม</th>
           </tr>
@@ -372,14 +402,12 @@
 
     <div class="summary-box">
       <div class="summary-row" id="rowSubTotal">
-        <span>ยอดรวมรายการ</span>
+        <span>รวมราคาสินค้า/บริการ</span>
         <span id="subTotalDisplay">0.00</span>
       </div>
-      <div class="summary-row" id="rowWht">
-        <label class="vat-toggle">
-          <input type="checkbox" id="whtToggle" onchange="calcTotal(); saveData()"> หักภาษี ณ ที่จ่าย 3%
-        </label>
-        <span id="whtDisplay">0.00</span>
+      <div class="summary-row" id="rowExtraCost">
+        <label for="extraCost">ค่าขนส่ง/ค่าใช้จ่ายเพิ่มเติม</label>
+        <input class="extra-cost-input" type="number" id="extraCost" min="0" step="0.01" value="0" inputmode="decimal" oninput="calcTotal(); saveData()">
       </div>
       <div class="summary-row" id="rowVat">
         <label class="vat-toggle">
@@ -388,10 +416,22 @@
         <span id="vatDisplay">0.00</span>
       </div>
       <div class="summary-row total">
-        <span>ยอดรวมทั้งสิ้น</span>
-        <span id="grandTotalDisplay">0.00 บาท</span>
+        <span>ยอดรวมตามใบเสนอราคา</span>
+        <span id="quoteTotalDisplay">0.00 บาท</span>
       </div>
       <div class="thai-text" id="thaiTextDisplay">(ศูนย์บาทถ้วน)</div>
+      <div class="summary-row" id="rowWht">
+        <label class="vat-toggle">
+          <input type="checkbox" id="whtToggle" onchange="calcTotal(); saveData()">
+          หัก ณ ที่จ่าย
+          <input class="wht-rate-input" type="number" id="whtRate" min="0" max="100" step="0.01" value="3" inputmode="decimal" oninput="calcTotal(); saveData()">%
+        </label>
+        <span id="whtDisplay">0.00</span>
+      </div>
+      <div class="summary-row total" id="rowPaymentEstimate" style="display:none">
+        <span>ประมาณการยอดชำระสุทธิ</span>
+        <span id="paymentEstimateDisplay">0.00 บาท</span>
+      </div>
     </div>
   </div>
 
@@ -405,18 +445,22 @@
             <div class="sig-space"></div>
             <input class="sig-name-input" id="sigSeller" type="text" placeholder="ชื่อ - นามสกุล" oninput="saveData()">
             <div class="sig-date-label">วันที่</div>
-            <input type="date" class="sig-date-input" id="sigSellerDate"
-              onchange="updateSigDate('sigSellerDate','sigSellerDateDisplay'); saveData()">
-            <div class="sig-date-display" id="sigSellerDateDisplay"></div>
+            <div class="date-control sig-date-control">
+              <button type="button" class="date-value" onclick="openDatePicker('sigSellerDate')" aria-label="เลือกวันที่ผู้เสนอราคา"><span id="sigSellerDateDisplay"></span></button>
+              <input type="date" class="date-native" id="sigSellerDate" onchange="updateSigDate('sigSellerDate','sigSellerDateDisplay'); saveData()">
+              <button type="button" class="date-clear no-print hidden" id="sigSellerDateClear" onclick="clearDate('sigSellerDate','sigSellerDateDisplay')" aria-label="ล้างวันที่ผู้เสนอราคา" title="ล้างวันที่">×</button>
+            </div>
           </div>
           <div class="sig-col">
             <div class="sig-col-label">ผู้อนุมัติ / ลูกค้า</div>
             <div class="sig-space"></div>
             <input class="sig-name-input" id="sigBuyer" type="text" placeholder="ชื่อ - นามสกุล" oninput="saveData()">
             <div class="sig-date-label">วันที่</div>
-            <input type="date" class="sig-date-input" id="sigBuyerDate"
-              onchange="updateSigDate('sigBuyerDate','sigBuyerDateDisplay'); saveData()">
-            <div class="sig-date-display" id="sigBuyerDateDisplay"></div>
+            <div class="date-control sig-date-control">
+              <button type="button" class="date-value" onclick="openDatePicker('sigBuyerDate')" aria-label="เลือกวันที่ผู้อนุมัติหรือลูกค้า"><span id="sigBuyerDateDisplay"></span></button>
+              <input type="date" class="date-native" id="sigBuyerDate" onchange="updateSigDate('sigBuyerDate','sigBuyerDateDisplay'); saveData()">
+              <button type="button" class="date-clear no-print hidden" id="sigBuyerDateClear" onclick="clearDate('sigBuyerDate','sigBuyerDateDisplay')" aria-label="ล้างวันที่ผู้อนุมัติหรือลูกค้า" title="ล้างวันที่">×</button>
+            </div>
           </div>
         </div>
       </div>
@@ -484,10 +528,48 @@
     return `${parseInt(d)} ${thaiMonths[parseInt(m)-1]} ${parseInt(y)+543}`;
   }
 
+  function todayBangkok() {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Bangkok', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(new Date());
+    const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
+    return `${values.year}-${values.month}-${values.day}`;
+  }
+
+  function updateDateControl(inputId, displayId) {
+    const input = document.getElementById(inputId);
+    const display = document.getElementById(displayId);
+    const clearButton = document.getElementById(inputId + 'Clear');
+    const hasValue = Boolean(input?.value);
+    if (display) display.textContent = hasValue ? fmtThaiDate(input.value) : '';
+    if (clearButton) clearButton.classList.toggle('hidden', !hasValue);
+  }
+
+  function openDatePicker(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    try {
+      if (typeof input.showPicker === 'function') input.showPicker();
+      else { input.focus(); input.click(); }
+    } catch (e) {
+      input.focus();
+      input.click();
+    }
+  }
+
+  function clearDate(inputId, displayId) {
+    const input = document.getElementById(inputId);
+    if (input) input.value = '';
+    updateDateControl(inputId, displayId);
+    saveData();
+  }
+
+  function updateDocDate(inputId, displayId) {
+    updateDateControl(inputId, displayId);
+  }
+
   function updateSigDate(inputId, displayId) {
-    const val = document.getElementById(inputId)?.value || '';
-    const el = document.getElementById(displayId);
-    if (el) el.textContent = fmtThaiDate(val);
+    updateDateControl(inputId, displayId);
   }
 
   function fmt(n) {
@@ -559,6 +641,7 @@
         </div>
       </td>
       <td class="td-num-val"><input class="item-input qty-input" type="number" min="0" value="1" inputmode="numeric" oninput="calcRow(${id}); saveData()"></td>
+      <td class="td-num-val"><input class="item-input unit-input" type="text" placeholder="หน่วย" oninput="saveData()"></td>
       <td class="td-num-val">
         <span class="item-input price-display" onclick="showPriceInput(${id})" style="cursor:text;">0</span>
         <input class="item-input price-input" type="number" min="0" step="1" value="0" inputmode="numeric" style="display:none;" onblur="hidePriceInput(${id})" oninput="calcRow(${id}); saveData()">
@@ -591,23 +674,30 @@
       subTotal += val;
     });
 
+    const extraCost = Math.max(0, parseFloat(document.getElementById('extraCost')?.value) || 0);
     const useWht = document.getElementById('whtToggle')?.checked;
     const useVat = document.getElementById('vatToggle')?.checked;
+    const whtRate = Math.max(0, parseFloat(document.getElementById('whtRate')?.value) || 0);
 
-    // VAT คิดจากยอดรวมรายการ
-    const vat = useVat ? subTotal * 0.07 : 0;
-    // หัก ณ ที่จ่าย 3% คิดจากยอดรวมรายการ (ฐานบริการทั่วไป)
-    const wht = useWht ? subTotal * 0.03 : 0;
+    // ค่าใช้จ่ายเพิ่มเติมเป็นส่วนหนึ่งของมูลค่าก่อน VAT
+    const vatBase = subTotal + extraCost;
+    const vat = useVat ? vatBase * 0.07 : 0;
+    // หัก ณ ที่จ่ายคำนวณจากยอดสินค้า/บริการ ไม่รวม VAT และค่าใช้จ่ายเพิ่มเติม
+    const wht = useWht ? subTotal * (whtRate / 100) : 0;
 
-    // ยอดสุทธิ = ยอดรวม + VAT - หัก ณ ที่จ่าย
-    const grand = subTotal + vat - wht;
+    const quoteTotal = vatBase + vat;
+    const paymentEstimate = quoteTotal - wht;
 
     document.getElementById('subTotalDisplay').textContent = fmt(subTotal);
     const whtEl = document.getElementById('whtDisplay');
     if (whtEl) whtEl.textContent = useWht ? ('-' + fmt(wht)) : '0.00';
     document.getElementById('vatDisplay').textContent = fmt(vat);
-    document.getElementById('grandTotalDisplay').textContent = fmt(grand) + ' บาท';
-    document.getElementById('thaiTextDisplay').textContent = '(' + ThaiBahtText(grand) + ')';
+    document.getElementById('quoteTotalDisplay').textContent = fmt(quoteTotal) + ' บาท';
+    document.getElementById('paymentEstimateDisplay').textContent = fmt(paymentEstimate) + ' บาท';
+    document.getElementById('thaiTextDisplay').textContent = '(' + ThaiBahtText(quoteTotal) + ')';
+    const estimateRow = document.getElementById('rowPaymentEstimate');
+    const showWht = document.getElementById('showWht')?.checked !== false;
+    if (estimateRow) estimateRow.style.display = useWht && showWht ? '' : 'none';
   }
 
   function delRow(id) {
@@ -616,24 +706,8 @@
     saveData();
   }
 
-  function onCodeInput(el) {
-    // อนุญาตเฉพาะตัวเลข ไม่เกิน 3 หลัก
-    el.value = el.value.replace(/\D/g, '').slice(0, 3);
-    saveData();
-  }
-  function padCode(el) {
-    // เติม 0 ด้านหน้าให้ครบ 3 หลัก
-    const n = (el.value || '').replace(/\D/g, '');
-    el.value = n.padStart(3, '0');
-    saveData();
-  }
   function getDocNo() {
-    const n = (document.getElementById('docNoNum')?.value || '000').replace(/\D/g, '').padStart(3, '0');
-    return 'QS-' + n;
-  }
-  function getDocRef() {
-    const n = (document.getElementById('docRefNum')?.value || '000').replace(/\D/g, '').padStart(3, '0');
-    return 'BS-' + n;
+    return document.getElementById('docNo')?.value || '';
   }
 
   function toggleSummaryWidget(e) {
@@ -659,6 +733,7 @@
       const row = document.getElementById(rowId);
       if (cb && row) row.style.display = cb.checked ? '' : 'none';
     });
+    calcTotal();
   }
 
   function gatherData() {
@@ -669,6 +744,7 @@
         name: row.querySelector('.item-name')?.value || '',
         detail: row.querySelector('.item-detail')?.value || '',
         qty: row.querySelector('.qty-input')?.value || '1',
+        unit: row.querySelector('.unit-input')?.value || '',
         price: String(parsePriceInput(row.querySelector('.price-input'))),
         rowTotal: row.querySelector('.item-total')?.value || ''
       });
@@ -676,13 +752,15 @@
     return {
       companyNote: document.getElementById('companyNote')?.value || '',
       custName: document.getElementById('custName')?.value || '',
-      docNoNum: (document.getElementById('docNoNum')?.value || '000').replace(/\D/g, '').padStart(3, '0'),
+      docNo: document.getElementById('docNo')?.value || '',
       docDate: document.getElementById('docDate')?.value || '',
       dueDate: document.getElementById('dueDate')?.value || '',
       issuerName: document.getElementById('issuerName')?.value || '',
-      docRefNum: (document.getElementById('docRefNum')?.value || '000').replace(/\D/g, '').padStart(3, '0'),
+      docRef: document.getElementById('docRef')?.value || '',
       remarks: document.getElementById('remarks')?.value || '',
+      extraCost: document.getElementById('extraCost')?.value || '0',
       whtToggle: document.getElementById('whtToggle')?.checked || false,
+      whtRate: document.getElementById('whtRate')?.value || '3',
       vatToggle: document.getElementById('vatToggle')?.checked || false,
       showSubTotal: document.getElementById('showSubTotal')?.checked !== false,
       showWht: document.getElementById('showWht')?.checked !== false,
@@ -704,8 +782,10 @@
     try { raw = localStorage.getItem('quo_data'); } catch(e) {}
     if (!raw) {
       addRow(); addRow(); addRow();
-      const now = new Date();
-      document.getElementById('docDate').value = now.toISOString().slice(0,10);
+      document.getElementById('docDate').value = todayBangkok();
+      document.getElementById('docNo').value = `QT-${todayBangkok().slice(0, 4)}-0001`;
+      updateDocDate('docDate','docDateDisplay');
+      updateDocDate('dueDate','dueDateDisplay');
       calcTotal();
       return;
     }
@@ -714,15 +794,17 @@
       const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
       set('companyNote', d.companyNote);
       set('custName', d.custName);
-      // รองรับทั้งค่าเก่า (QS-001) และค่าใหม่ (แค่เลข)
-      const noNum = (d.docNoNum || (d.docNo || '').replace(/\D/g, '') || '000').replace(/\D/g, '').slice(-3).padStart(3, '0');
-      const refNum = (d.docRefNum || (d.docRef || '').replace(/\D/g, '') || '000').replace(/\D/g, '').slice(-3).padStart(3, '0');
-      set('docNoNum', noNum);
+      // รองรับข้อมูลเดิมที่เก็บเฉพาะเลขท้ายเอกสาร
+      const legacyDigits = (d.docNoNum || '').replace(/\D/g, '');
+      const legacyNo = legacyDigits ? legacyDigits.slice(-4).padStart(4, '0') : '';
+      set('docNo', d.docNo || (legacyNo ? `QT-${(d.docDate || todayBangkok()).slice(0, 4)}-${legacyNo}` : `QT-${todayBangkok().slice(0, 4)}-0001`));
       set('docDate', d.docDate);
       set('dueDate', d.dueDate);
       set('issuerName', d.issuerName);
-      set('docRefNum', refNum);
+      set('docRef', d.docRef || (d.docRefNum ? `BS-${d.docRefNum}` : ''));
       set('remarks', d.remarks);
+      set('extraCost', d.extraCost || '0');
+      set('whtRate', d.whtRate || '3');
       if (document.getElementById('whtToggle')) document.getElementById('whtToggle').checked = !!d.whtToggle;
       if (document.getElementById('vatToggle')) document.getElementById('vatToggle').checked = !!d.vatToggle;
       // restore summary visibility
@@ -737,6 +819,8 @@
       set('sigBuyerDate', d.sigBuyerDate);
       updateSigDate('sigSellerDate','sigSellerDateDisplay');
       updateSigDate('sigBuyerDate','sigBuyerDateDisplay');
+      updateDocDate('docDate','docDateDisplay');
+      updateDocDate('dueDate','dueDateDisplay');
 
       if (d.rows && d.rows.length > 0) {
         d.rows.forEach(r => {
@@ -749,6 +833,7 @@
           detail.value = r.detail || '';
           autoResize(detail);
           row.querySelector('.qty-input').value = r.qty || '1';
+          row.querySelector('.unit-input').value = r.unit || '';
           row.querySelector('.price-input').value = String(r.price || '0').replace(/[^0-9.]/g, '');
           formatPriceDisplay(id);
           calcRow(id);
@@ -777,12 +862,17 @@
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
-    if (document.getElementById('docNoNum')) document.getElementById('docNoNum').value = '000';
-    if (document.getElementById('docRefNum')) document.getElementById('docRefNum').value = '000';
+    if (document.getElementById('docNo')) document.getElementById('docNo').value = `QT-${todayBangkok().slice(0, 4)}-0001`;
+    if (document.getElementById('docRef')) document.getElementById('docRef').value = '';
+    if (document.getElementById('extraCost')) document.getElementById('extraCost').value = '0';
+    if (document.getElementById('whtRate')) document.getElementById('whtRate').value = '3';
     if (document.getElementById('whtToggle')) document.getElementById('whtToggle').checked = false;
     if (document.getElementById('vatToggle')) document.getElementById('vatToggle').checked = false;
-    const now = new Date();
-    document.getElementById('docDate').value = now.toISOString().slice(0,10);
+    document.getElementById('docDate').value = todayBangkok();
+    updateDocDate('docDate','docDateDisplay');
+    updateDocDate('dueDate','dueDateDisplay');
+    updateSigDate('sigSellerDate','sigSellerDateDisplay');
+    updateSigDate('sigBuyerDate','sigBuyerDateDisplay');
     addRow(); addRow(); addRow();
     calcTotal();
     showToast('ล้างข้อมูลแล้ว ✓');
@@ -795,7 +885,7 @@
 
     const element = document.getElementById('form-area');
     const note = (document.getElementById('companyNote')?.value || 'ใบเสนอราคา').slice(0, 30).replace(/[\\/:*?"<>|]/g, '');
-    const filename = `${note || 'ใบเสนอราคา'}_${new Date().toISOString().slice(0,10)}.pdf`;
+    const filename = `${note || 'ใบเสนอราคา'}_${todayBangkok()}.pdf`;
 
     const opt = {
       margin: [8, 8, 8, 8],
