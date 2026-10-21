@@ -35,6 +35,7 @@
   .topbar-title { color: #fff; font-weight: 700; font-size: 16px; }
   .topbar-title span { color: var(--accent); }
   .topbar-actions { display: flex; gap: 8px; align-items: center; }
+  .language-toggle { min-width: 54px; justify-content: center; }
   .btn {
     border: none; padding: 8px 16px; border-radius: 8px;
     font-family: 'Sarabun', sans-serif; font-size: 13px; font-weight: 600;
@@ -297,6 +298,7 @@
       width: 100%;
       justify-content: flex-end;
       gap: 5px;
+      flex-wrap: wrap;
     }
     .btn,
     .summary-settings-btn {
@@ -314,6 +316,10 @@
     .wrapper { padding-top: 112px; }
     .items-wrapper { overflow-x: auto; }
     .items-table { min-width: 700px; }
+  }
+  @media (max-width: 420px) {
+    .wrapper { padding-top: 148px; }
+    .company-widget { top: 124px; }
   }
   @media print {
     @page { size: A4; margin: 10mm; }
@@ -352,27 +358,30 @@
 <body>
 
 <div class="topbar">
-  <div class="topbar-title">📄 ใบเสนอ<span>ราคา</span></div>
+  <div class="topbar-title" id="topbarTitle">📄 ใบเสนอ<span>ราคา</span></div>
   <div class="topbar-actions" style="position:relative;">
-    <button class="summary-settings-btn no-print" onclick="toggleSummaryWidget(event)" title="ตั้งค่ายอดสรุป">
+    <button class="summary-settings-btn language-toggle no-print" id="languageToggle" onclick="toggleLanguage()" title="Switch to English" aria-label="Switch to English">
+      <span aria-hidden="true">🌐</span><span id="languageToggleText">EN</span>
+    </button>
+    <button class="summary-settings-btn no-print" onclick="toggleSummaryWidget(event)" title="ตั้งค่ายอดสรุป" data-i18n-title="summarySettingsTitle">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      ยอดสรุป
+      <span data-i18n="summaryButton">ยอดสรุป</span>
     </button>
     <div class="summary-widget no-print" id="summaryWidget">
-      <h4>แสดงในยอดสรุป</h4>
-      <label><input type="checkbox" id="showSubTotal" checked onchange="applySummaryVisibility(); saveData()"> รวมราคาสินค้า/บริการ</label>
-      <label><input type="checkbox" id="showExtraCost" checked onchange="applySummaryVisibility(); saveData()"> ค่าขนส่ง/ค่าใช้จ่ายเพิ่มเติม</label>
-      <label><input type="checkbox" id="showWht" checked onchange="applySummaryVisibility(); saveData()"> หัก ณ ที่จ่าย</label>
-      <label><input type="checkbox" id="showVat" checked onchange="applySummaryVisibility(); saveData()"> รวม VAT 7%</label>
+      <h4 data-i18n="summaryMenuTitle">แสดงในยอดสรุป</h4>
+      <label><input type="checkbox" id="showSubTotal" checked onchange="applySummaryVisibility(); saveData()"> <span data-i18n="subtotal">รวมราคาสินค้า/บริการ</span></label>
+      <label><input type="checkbox" id="showExtraCost" checked onchange="applySummaryVisibility(); saveData()"> <span data-i18n="extraCost">ค่าขนส่ง/ค่าใช้จ่ายเพิ่มเติม</span></label>
+      <label><input type="checkbox" id="showWht" checked onchange="applySummaryVisibility(); saveData()"> <span data-i18n="whtShort">หัก ณ ที่จ่าย</span></label>
+      <label><input type="checkbox" id="showVat" checked onchange="applySummaryVisibility(); saveData()"> <span data-i18n="vat">รวม VAT 7%</span></label>
     </div>
     <div class="header-menu no-print">
-      <button class="summary-settings-btn" onclick="toggleCompanyWidget(event)" title="เลือกข้อมูลผู้เสนอราคา">
+      <button class="summary-settings-btn" onclick="toggleCompanyWidget(event)" title="เลือกข้อมูลผู้เสนอราคา" data-i18n-title="companySettingsTitle">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>
-        ข้อมูล
+        <span data-i18n="companyButton">ข้อมูล</span>
       </button>
       <div class="company-widget" id="companyWidget">
-        <h4>ข้อมูลผู้เสนอราคา</h4>
-        <button type="button" class="company-preset" onclick="applyCompanyPreset()">
+        <h4 data-i18n="companyMenuTitle">ข้อมูลผู้เสนอราคา</h4>
+        <button type="button" class="company-preset" id="companyPreset" onclick="applyCompanyPreset()">
           ช่างเกล้า Built-in<br>
           101/158 ซ.55 ถนนเลียบวารี แขวงโคกแฝก เขตหนองจอก กรุงเทพฯ 10530<br>
           โทร.091-876-8157
@@ -381,11 +390,11 @@
     </div>
     <button class="btn btn-reset" onclick="resetForm()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
-      ล้างข้อมูล
+      <span data-i18n="reset">ล้างข้อมูล</span>
     </button>
     <button class="btn btn-pdf" id="pdfBtn" onclick="exportPDF()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-      Export PDF
+      <span data-i18n="exportPdf">Export PDF</span>
     </button>
   </div>
 </div>
@@ -395,50 +404,50 @@
   <div class="doc-header" style="margin-bottom:4px">
     <div class="doc-top">
       <div style="width:50%; display:flex; flex-direction:column; gap:4px">
-        <textarea id="companyNote" rows="1" placeholder="ชื่อบริษัท / ที่อยู่ (ผู้ออกใบเสนอราคา)"
+        <textarea id="companyNote" rows="1" placeholder="ชื่อบริษัท / ที่อยู่ (ผู้ออกใบเสนอราคา)" data-i18n-placeholder="companyPlaceholder"
           oninput="autoResize(this); syncCompanyNoteDisplay(); saveData()"
           style="width:100%; padding:6px 0; border:none; border-bottom:1px dashed var(--border);
                  font-family:'Sarabun',sans-serif; font-size:12px; color:var(--text);
                  background:transparent; resize:none; overflow:hidden;"></textarea>
         <div class="company-note-print" id="companyNotePrint"></div>
         <div style="padding:4px 0;">
-          <div style="font-size:11px; font-weight:700; color:var(--muted); margin-bottom:2px">ลูกค้า</div>
-          <textarea id="custName" rows="1" placeholder="กรอกชื่อลูกค้าหรือบริษัท"
+          <div style="font-size:11px; font-weight:700; color:var(--muted); margin-bottom:2px" data-i18n="customer">ลูกค้า</div>
+          <textarea id="custName" rows="1" placeholder="กรอกชื่อลูกค้าหรือบริษัท" data-i18n-placeholder="customerPlaceholder"
             oninput="autoResize(this); saveData()"
             style="width:100%; border:none; border-bottom:1px dashed var(--border); background:transparent; resize:none; overflow:hidden;
                    font-family:'Sarabun',sans-serif; font-size:12px; color:var(--text); padding:4px 0;"></textarea>
         </div>
       </div>
       <div class="doc-badge">
-        <div class="badge-title">ใบเสนอราคา</div>
+        <div class="badge-title" data-i18n="quotation">ใบเสนอราคา</div>
         <div style="margin-top:1.5em; display:flex; flex-direction:column; gap:4px">
           <div style="display:flex; align-items:center; gap:6px">
-            <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">เลขที่</span>
+            <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0" data-i18n="quotationNo">เลขที่</span>
             <input type="text" id="docNo" value="QT-2026-0001" oninput="saveData()" onclick="this.select()"
               style="width:68%; margin-left:auto; border:none; background:transparent; font-size:11px; line-height:1.6; color:var(--text); font-family:'Sarabun',sans-serif; padding:2px 5px; text-align:left;">
           </div>
           <div style="display:flex; align-items:center; gap:6px">
-            <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">วันที่</span>
+            <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0" data-i18n="date">วันที่</span>
             <div class="date-control doc-date-field">
-              <button type="button" class="date-value" onclick="openDatePicker('docDate')" aria-label="เลือกวันที่เอกสาร"><span id="docDateDisplay"></span></button>
+              <button type="button" class="date-value" onclick="openDatePicker('docDate')" aria-label="เลือกวันที่เอกสาร" data-i18n-aria="documentDateAria"><span id="docDateDisplay"></span></button>
               <input class="date-native" type="date" id="docDate" onchange="updateDocDate('docDate','docDateDisplay'); saveData()">
-              <button type="button" class="date-clear no-print hidden" id="docDateClear" onclick="clearDate('docDate','docDateDisplay')" aria-label="ล้างวันที่เอกสาร" title="ล้างวันที่">×</button>
+              <button type="button" class="date-clear no-print hidden" id="docDateClear" onclick="clearDate('docDate','docDateDisplay')" aria-label="ล้างวันที่เอกสาร" data-i18n-aria="clearDocumentDateAria" title="ล้างวันที่" data-i18n-title="clearDate">×</button>
             </div>
           </div>
           <div style="display:flex; align-items:center; gap:6px">
-            <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">ราคายืนถึง</span>
+            <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0" data-i18n="validUntil">ราคายืนถึง</span>
             <div class="date-control doc-date-field">
-              <button type="button" class="date-value" onclick="openDatePicker('dueDate')" aria-label="เลือกราคายืนถึง"><span id="dueDateDisplay"></span></button>
+              <button type="button" class="date-value" onclick="openDatePicker('dueDate')" aria-label="เลือกราคายืนถึง" data-i18n-aria="validUntilAria"><span id="dueDateDisplay"></span></button>
               <input class="date-native" type="date" id="dueDate" onchange="updateDocDate('dueDate','dueDateDisplay'); saveData()">
-              <button type="button" class="date-clear no-print hidden" id="dueDateClear" onclick="clearDate('dueDate','dueDateDisplay')" aria-label="ล้างราคายืนถึง" title="ล้างวันที่">×</button>
+              <button type="button" class="date-clear no-print hidden" id="dueDateClear" onclick="clearDate('dueDate','dueDateDisplay')" aria-label="ล้างราคายืนถึง" data-i18n-aria="clearValidUntilAria" title="ล้างวันที่" data-i18n-title="clearDate">×</button>
             </div>
           </div>
           <div style="display:flex; align-items:center; gap:6px">
-            <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">ผู้ออก</span>
+            <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0" data-i18n="issuedBy">ผู้ออก</span>
             <input type="text" id="issuerName" oninput="saveData()" style="width:68%; margin-left:auto; font-size:11px; line-height:1.6; color:var(--text); border:none; background:transparent; font-family:'Sarabun',sans-serif; padding:2px 5px;">
           </div>
           <div style="display:flex; align-items:center; gap:6px">
-            <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0">อ้างอิง</span>
+            <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0" data-i18n="reference">อ้างอิง</span>
             <input type="text" id="docRef" placeholder="PO / RFQ" oninput="saveData()"
               style="width:68%; margin-left:auto; border:none; background:transparent; font-size:11px; line-height:1.6; color:var(--text); font-family:'Sarabun',sans-serif; padding:2px 5px; text-align:left;">
           </div>
@@ -455,12 +464,12 @@
         </colgroup>
         <thead>
           <tr>
-            <th>ลำดับ</th>
-            <th>รายการ / รายละเอียด</th>
-            <th>จำนวน</th>
-            <th>หน่วย</th>
-            <th>ราคา/หน่วย</th>
-            <th>ราคารวม</th>
+            <th data-i18n="itemNo">ลำดับ</th>
+            <th data-i18n="description">รายการ / รายละเอียด</th>
+            <th data-i18n="quantity">จำนวน</th>
+            <th data-i18n="unit">หน่วย</th>
+            <th data-i18n="unitPrice">ราคา/หน่วย</th>
+            <th data-i18n="amount">ราคารวม</th>
           </tr>
         </thead>
         <tbody id="itemsBody"></tbody>
@@ -469,14 +478,14 @@
     <div style="padding:8px 0 0" class="no-print">
       <button class="btn-add-row" onclick="addRow()">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        + เพิ่มรายการ
+        <span data-i18n="addItem">+ เพิ่มรายการ</span>
       </button>
     </div>
   </div>
 
   <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:12px; gap:16px; flex-wrap:wrap;">
     <div style="display:flex; align-items:flex-start; gap:8px; flex:1; min-width:200px;">
-      <span style="font-size:13px; font-weight:700; color:#e05050; white-space:nowrap; padding-top:6px">หมายเหตุ</span>
+      <span style="font-size:13px; font-weight:700; color:#e05050; white-space:nowrap; padding-top:6px" data-i18n="notes">หมายเหตุ</span>
       <textarea id="remarks" rows="4" oninput="autoResize(this); saveData()"
         style="width:100%; max-width:320px; font-size:13px; color:#1a2a3a;
                border:none; border-bottom:1px dashed var(--border); border-radius:0;
@@ -486,34 +495,34 @@
 
     <div class="summary-box">
       <div class="summary-row" id="rowSubTotal">
-        <span>รวมราคาสินค้า/บริการ</span>
+        <span data-i18n="subtotal">รวมราคาสินค้า/บริการ</span>
         <span id="subTotalDisplay">0.00</span>
       </div>
       <div class="summary-row" id="rowExtraCost">
-        <label for="extraCost">ค่าขนส่ง/ค่าใช้จ่ายเพิ่มเติม</label>
+        <label for="extraCost" data-i18n="extraCost">ค่าขนส่ง/ค่าใช้จ่ายเพิ่มเติม</label>
         <input class="extra-cost-input" type="number" id="extraCost" min="0" step="0.01" value="0" inputmode="decimal" oninput="calcTotal(); saveData()">
       </div>
       <div class="summary-row" id="rowVat">
         <label class="vat-toggle">
-          <input type="checkbox" id="vatToggle" onchange="calcTotal(); saveData()"> รวม VAT 7%
+          <input type="checkbox" id="vatToggle" onchange="calcTotal(); saveData()"> <span data-i18n="vat">รวม VAT 7%</span>
         </label>
         <span id="vatDisplay">0.00</span>
       </div>
       <div class="summary-row total">
-        <span>ยอดรวมทั้งสิ้น</span>
+        <span data-i18n="grandTotal">ยอดรวมทั้งสิ้น</span>
         <span id="quoteTotalDisplay">0.00 บาท</span>
       </div>
       <div class="thai-text" id="thaiTextDisplay">(ศูนย์บาทถ้วน)</div>
       <div class="summary-row" id="rowWht">
         <label class="vat-toggle">
           <input type="checkbox" id="whtToggle" onchange="calcTotal(); saveData()">
-          ประมาณการหัก ณ ที่จ่าย
+          <span data-i18n="whtEstimate">ประมาณการหัก ณ ที่จ่าย</span>
           <input class="wht-rate-input" type="number" id="whtRate" min="0" max="100" step="0.01" value="3" inputmode="decimal" oninput="calcTotal(); saveData()">%
         </label>
         <span id="whtDisplay">0.00</span>
       </div>
       <div class="summary-row total" id="rowPaymentEstimate" style="display:none">
-        <span>ประมาณการยอดชำระสุทธิ</span>
+        <span data-i18n="netPayment">ประมาณการยอดชำระสุทธิ</span>
         <span id="paymentEstimateDisplay">0.00 บาท</span>
       </div>
     </div>
@@ -522,28 +531,28 @@
   <div class="footer-bottom-row">
     <div class="footer-bottom-right">
       <div class="sig-inline">
-        <div class="sig-inline-title">ลายเซ็นผู้อนุมัติ</div>
+        <div class="sig-inline-title" data-i18n="approvalSignatures">ลายเซ็นผู้อนุมัติ</div>
         <div class="sig-cols">
           <div class="sig-col">
-            <div class="sig-col-label">ผู้เสนอราคา</div>
+            <div class="sig-col-label" data-i18n="seller">ผู้เสนอราคา</div>
             <div class="sig-space"></div>
-            <input class="sig-name-input" id="sigSeller" type="text" placeholder="ชื่อ - นามสกุล" oninput="saveData()">
-            <div class="sig-date-label">วันที่</div>
+            <input class="sig-name-input" id="sigSeller" type="text" placeholder="ชื่อ - นามสกุล" data-i18n-placeholder="fullName" oninput="saveData()">
+            <div class="sig-date-label" data-i18n="date">วันที่</div>
             <div class="date-control sig-date-control">
-              <button type="button" class="date-value" onclick="openDatePicker('sigSellerDate')" aria-label="เลือกวันที่ผู้เสนอราคา"><span id="sigSellerDateDisplay"></span></button>
+              <button type="button" class="date-value" onclick="openDatePicker('sigSellerDate')" aria-label="เลือกวันที่ผู้เสนอราคา" data-i18n-aria="sellerDateAria"><span id="sigSellerDateDisplay"></span></button>
               <input type="date" class="date-native" id="sigSellerDate" onchange="updateSigDate('sigSellerDate','sigSellerDateDisplay'); saveData()">
-              <button type="button" class="date-clear no-print hidden" id="sigSellerDateClear" onclick="clearDate('sigSellerDate','sigSellerDateDisplay')" aria-label="ล้างวันที่ผู้เสนอราคา" title="ล้างวันที่">×</button>
+              <button type="button" class="date-clear no-print hidden" id="sigSellerDateClear" onclick="clearDate('sigSellerDate','sigSellerDateDisplay')" aria-label="ล้างวันที่ผู้เสนอราคา" data-i18n-aria="clearSellerDateAria" title="ล้างวันที่" data-i18n-title="clearDate">×</button>
             </div>
           </div>
           <div class="sig-col">
-            <div class="sig-col-label">ผู้อนุมัติ / ลูกค้า</div>
+            <div class="sig-col-label" data-i18n="buyer">ผู้อนุมัติ / ลูกค้า</div>
             <div class="sig-space"></div>
-            <input class="sig-name-input" id="sigBuyer" type="text" placeholder="ชื่อ - นามสกุล" oninput="saveData()">
-            <div class="sig-date-label">วันที่</div>
+            <input class="sig-name-input" id="sigBuyer" type="text" placeholder="ชื่อ - นามสกุล" data-i18n-placeholder="fullName" oninput="saveData()">
+            <div class="sig-date-label" data-i18n="date">วันที่</div>
             <div class="date-control sig-date-control">
-              <button type="button" class="date-value" onclick="openDatePicker('sigBuyerDate')" aria-label="เลือกวันที่ผู้อนุมัติหรือลูกค้า"><span id="sigBuyerDateDisplay"></span></button>
+              <button type="button" class="date-value" onclick="openDatePicker('sigBuyerDate')" aria-label="เลือกวันที่ผู้อนุมัติหรือลูกค้า" data-i18n-aria="buyerDateAria"><span id="sigBuyerDateDisplay"></span></button>
               <input type="date" class="date-native" id="sigBuyerDate" onchange="updateSigDate('sigBuyerDate','sigBuyerDateDisplay'); saveData()">
-              <button type="button" class="date-clear no-print hidden" id="sigBuyerDateClear" onclick="clearDate('sigBuyerDate','sigBuyerDateDisplay')" aria-label="ล้างวันที่ผู้อนุมัติหรือลูกค้า" title="ล้างวันที่">×</button>
+              <button type="button" class="date-clear no-print hidden" id="sigBuyerDateClear" onclick="clearDate('sigBuyerDate','sigBuyerDateDisplay')" aria-label="ล้างวันที่ผู้อนุมัติหรือลูกค้า" data-i18n-aria="clearBuyerDateAria" title="ล้างวันที่" data-i18n-title="clearDate">×</button>
             </div>
           </div>
         </div>
@@ -552,15 +561,69 @@
   </div>
 
   <div style="text-align:center;padding:8px 0 4px;font-size:11px;color:var(--muted)" class="no-print">
-    กด <strong>Export PDF</strong> ด้านบน เพื่อดาวน์โหลดไฟล์ PDF
+    <span data-i18n="pdfHint">กด Export PDF ด้านบน เพื่อดาวน์โหลดไฟล์ PDF</span>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
+  const translations = {
+    th: {
+      pageTitle: 'ใบเสนอราคา', topbarTitle: '📄 ใบเสนอ<span>ราคา</span>', quotation: 'ใบเสนอราคา',
+      summaryButton: 'ยอดสรุป', summarySettingsTitle: 'ตั้งค่ายอดสรุป', summaryMenuTitle: 'แสดงในยอดสรุป',
+      companyButton: 'ข้อมูล', companySettingsTitle: 'เลือกข้อมูลผู้เสนอราคา', companyMenuTitle: 'ข้อมูลผู้เสนอราคา',
+      reset: 'ล้างข้อมูล', exportPdf: 'Export PDF', customer: 'ลูกค้า', quotationNo: 'เลขที่', date: 'วันที่',
+      validUntil: 'ราคายืนถึง', issuedBy: 'ผู้ออก', reference: 'อ้างอิง', itemNo: 'ลำดับ',
+      description: 'รายการ / รายละเอียด', quantity: 'จำนวน', unit: 'หน่วย', unitPrice: 'ราคา/หน่วย', amount: 'ราคารวม',
+      addItem: '+ เพิ่มรายการ', notes: 'หมายเหตุ', subtotal: 'รวมราคาสินค้า/บริการ',
+      extraCost: 'ค่าขนส่ง/ค่าใช้จ่ายเพิ่มเติม', vat: 'รวม VAT 7%', grandTotal: 'ยอดรวมทั้งสิ้น',
+      whtShort: 'หัก ณ ที่จ่าย', whtEstimate: 'ประมาณการหัก ณ ที่จ่าย', netPayment: 'ประมาณการยอดชำระสุทธิ',
+      approvalSignatures: 'ลายเซ็นผู้อนุมัติ', seller: 'ผู้เสนอราคา', buyer: 'ผู้อนุมัติ / ลูกค้า',
+      companyPlaceholder: 'ชื่อบริษัท / ที่อยู่ (ผู้ออกใบเสนอราคา)', customerPlaceholder: 'กรอกชื่อลูกค้าหรือบริษัท',
+      fullName: 'ชื่อ - นามสกุล', itemNamePlaceholder: 'ชื่อรายการ / สินค้า / บริการ',
+      itemDetailPlaceholder: 'รายละเอียดเพิ่มเติม (ถ้ามี)', unitPlaceholder: 'หน่วย', deleteItem: 'ลบรายการ',
+      pdfHint: 'กด Export PDF ด้านบน เพื่อดาวน์โหลดไฟล์ PDF', currency: 'บาท', quotationFilename: 'ใบเสนอราคา',
+      switchLanguage: 'Switch to English', clearDate: 'ล้างวันที่', documentDateAria: 'เลือกวันที่เอกสาร',
+      clearDocumentDateAria: 'ล้างวันที่เอกสาร', validUntilAria: 'เลือกราคายืนถึง', clearValidUntilAria: 'ล้างราคายืนถึง',
+      sellerDateAria: 'เลือกวันที่ผู้เสนอราคา', clearSellerDateAria: 'ล้างวันที่ผู้เสนอราคา',
+      buyerDateAria: 'เลือกวันที่ผู้อนุมัติหรือลูกค้า', clearBuyerDateAria: 'ล้างวันที่ผู้อนุมัติหรือลูกค้า',
+      confirmReset: 'ล้างข้อมูลทั้งหมดใช่ไหม?', resetDone: 'ล้างข้อมูลแล้ว ✓', presetDone: 'ใส่ข้อมูลผู้เสนอราคาแล้ว ✓',
+      creatingPdf: 'กำลังสร้าง...', pdfDone: 'ดาวน์โหลด PDF เรียบร้อย ✓', pdfError: 'เกิดข้อผิดพลาด กรุณาลองใหม่',
+      companyPresetHtml: 'ช่างเกล้า Built-in<br>101/158 ซ.55 ถนนเลียบวารี แขวงโคกแฝก เขตหนองจอก กรุงเทพฯ 10530<br>โทร.091-876-8157'
+    },
+    en: {
+      pageTitle: 'Quotation', topbarTitle: '📄 Quo<span>tation</span>', quotation: 'QUOTATION',
+      summaryButton: 'Summary', summarySettingsTitle: 'Summary settings', summaryMenuTitle: 'Show in summary',
+      companyButton: 'Company', companySettingsTitle: 'Select company details', companyMenuTitle: 'Company details',
+      reset: 'Reset', exportPdf: 'Export PDF', customer: 'Customer', quotationNo: 'Quotation No.', date: 'Date',
+      validUntil: 'Valid Until', issuedBy: 'Issued By', reference: 'Reference', itemNo: 'Item',
+      description: 'Description', quantity: 'Qty', unit: 'Unit', unitPrice: 'Unit Price', amount: 'Amount',
+      addItem: '+ Add Item', notes: 'Notes', subtotal: 'Subtotal', extraCost: 'Shipping / Additional Costs',
+      vat: 'VAT 7%', grandTotal: 'Grand Total', whtShort: 'Withholding Tax',
+      whtEstimate: 'Estimated Withholding Tax', netPayment: 'Estimated Net Payment',
+      approvalSignatures: 'APPROVAL SIGNATURES', seller: 'Prepared By', buyer: 'Approved By / Customer',
+      companyPlaceholder: 'Company name / address (quotation issuer)', customerPlaceholder: 'Customer or company name',
+      fullName: 'Full Name', itemNamePlaceholder: 'Product / Service Name', itemDetailPlaceholder: 'Additional details (optional)',
+      unitPlaceholder: 'Unit', deleteItem: 'Delete item', pdfHint: 'Click Export PDF above to download the PDF file.',
+      currency: 'THB', quotationFilename: 'Quotation', switchLanguage: 'เปลี่ยนเป็นภาษาไทย', clearDate: 'Clear date',
+      documentDateAria: 'Select quotation date', clearDocumentDateAria: 'Clear quotation date',
+      validUntilAria: 'Select validity date', clearValidUntilAria: 'Clear validity date',
+      sellerDateAria: 'Select preparer date', clearSellerDateAria: 'Clear preparer date',
+      buyerDateAria: 'Select approval date', clearBuyerDateAria: 'Clear approval date',
+      confirmReset: 'Reset all information?', resetDone: 'Information reset ✓', presetDone: 'Company details added ✓',
+      creatingPdf: 'Creating...', pdfDone: 'PDF downloaded ✓', pdfError: 'Something went wrong. Please try again.',
+      companyPresetHtml: 'Chang Klao Built-in<br>101/158 Soi 55, Liap Wari Road, Khok Faet, Nong Chok, Bangkok 10530<br>Tel. 091-876-8157'
+    }
+  };
+
+  let currentLanguage = 'th';
   let rowCount = 0;
   const thaiMonths = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+  function t(key) {
+    return translations[currentLanguage][key] || translations.th[key] || key;
+  }
 
   function ThaiBahtText(num) {
     if (num === null || num === undefined || isNaN(num)) return 'ศูนย์บาทถ้วน';
@@ -606,10 +669,45 @@
     return (isNeg ? 'ลบ' : '') + text;
   }
 
+  function EnglishBahtText(num) {
+    if (num === null || num === undefined || isNaN(num)) return 'Zero baht only';
+    num = Number(num);
+    const isNegative = num < 0;
+    const totalSatang = Math.round(Math.abs(num) * 100);
+    const baht = Math.floor(totalSatang / 100);
+    const satang = totalSatang % 100;
+    const ones = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+    const tens = ['', '', 'twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+    const scales = [[1000000000000, 'trillion'], [1000000000, 'billion'], [1000000, 'million'], [1000, 'thousand']];
+
+    function readNumber(n) {
+      if (n < 20) return ones[n];
+      if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 ? '-' + ones[n % 10] : '');
+      if (n < 1000) return ones[Math.floor(n / 100)] + ' hundred' + (n % 100 ? ' ' + readNumber(n % 100) : '');
+      for (const [value, name] of scales) {
+        if (n >= value) return readNumber(Math.floor(n / value)) + ' ' + name + (n % value ? ' ' + readNumber(n % value) : '');
+      }
+      return String(n);
+    }
+
+    let text = (isNegative ? 'minus ' : '') + readNumber(baht) + ' baht';
+    text += satang ? ' and ' + readNumber(satang) + ' satang' : ' only';
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
+
   function fmtThaiDate(val) {
     if (!val) return '';
     const [y, m, d] = val.split('-');
     return `${parseInt(d)} ${thaiMonths[parseInt(m)-1]} ${parseInt(y)+543}`;
+  }
+
+  function fmtDate(val) {
+    if (!val) return '';
+    if (currentLanguage === 'th') return fmtThaiDate(val);
+    const [y, m, d] = val.split('-').map(Number);
+    return new Intl.DateTimeFormat('en-GB', {
+      day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC'
+    }).format(new Date(Date.UTC(y, m - 1, d)));
   }
 
   function todayBangkok() {
@@ -625,7 +723,7 @@
     const display = document.getElementById(displayId);
     const clearButton = document.getElementById(inputId + 'Clear');
     const hasValue = Boolean(input?.value);
-    if (display) display.textContent = hasValue ? fmtThaiDate(input.value) : '';
+    if (display) display.textContent = hasValue ? fmtDate(input.value) : '';
     if (clearButton) clearButton.classList.toggle('hidden', !hasValue);
   }
 
@@ -657,7 +755,63 @@
   }
 
   function fmt(n) {
-    return Number(n).toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2});
+    return Number(n).toLocaleString(currentLanguage === 'th' ? 'th-TH' : 'en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  function pdfButtonMarkup(label, busy = false) {
+    const icon = busy
+      ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+      : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>';
+    return `${icon} <span>${label}</span>`;
+  }
+
+  function applyLanguage(language, persist = true) {
+    currentLanguage = language === 'en' ? 'en' : 'th';
+    document.documentElement.lang = currentLanguage;
+    document.title = t('pageTitle');
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.dataset.i18nTitle); });
+    document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+
+    const topbarTitle = document.getElementById('topbarTitle');
+    if (topbarTitle) topbarTitle.innerHTML = t('topbarTitle');
+    const preset = document.getElementById('companyPreset');
+    if (preset) preset.innerHTML = t('companyPresetHtml');
+    const languageToggle = document.getElementById('languageToggle');
+    const languageToggleText = document.getElementById('languageToggleText');
+    if (languageToggleText) languageToggleText.textContent = currentLanguage === 'th' ? 'EN' : 'ไทย';
+    if (languageToggle) {
+      languageToggle.title = t('switchLanguage');
+      languageToggle.setAttribute('aria-label', t('switchLanguage'));
+    }
+
+    document.querySelectorAll('.item-row').forEach(row => {
+      const name = row.querySelector('.item-name');
+      const detail = row.querySelector('.item-detail');
+      const unit = row.querySelector('.unit-input');
+      const remove = row.querySelector('.btn-del');
+      if (name) name.placeholder = t('itemNamePlaceholder');
+      if (detail) detail.placeholder = t('itemDetailPlaceholder');
+      if (unit) unit.placeholder = t('unitPlaceholder');
+      if (remove) {
+        remove.title = t('deleteItem');
+        remove.setAttribute('aria-label', t('deleteItem'));
+      }
+      const price = row.querySelector('.price-input');
+      const priceDisplay = row.querySelector('.price-display');
+      if (price && priceDisplay) priceDisplay.textContent = Number(parsePriceInput(price)).toLocaleString(currentLanguage === 'th' ? 'th-TH' : 'en-US');
+    });
+
+    ['docDate','dueDate','sigSellerDate','sigBuyerDate'].forEach(inputId => updateDateControl(inputId, inputId + 'Display'));
+    calcTotal();
+    const pdfButton = document.getElementById('pdfBtn');
+    if (pdfButton && !pdfButton.disabled) pdfButton.innerHTML = pdfButtonMarkup(t('exportPdf'));
+    if (persist) saveData();
+  }
+
+  function toggleLanguage() {
+    applyLanguage(currentLanguage === 'th' ? 'en' : 'th');
   }
 
   function showPriceInput(id) {
@@ -707,7 +861,7 @@
     row.innerHTML = `
       <td class="td-num" style="position:relative;">
         <input class="item-num-input" type="text" value="${id}" oninput="saveData()">
-        <button class="btn-del no-print" onclick="delRow(${id})" title="ลบรายการ"
+        <button class="btn-del no-print" onclick="delRow(${id})" title="${t('deleteItem')}" aria-label="${t('deleteItem')}"
           style="position:absolute;top:2px;right:2px;width:16px;height:16px;padding:0;display:flex;align-items:center;justify-content:center;">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -717,15 +871,15 @@
       <td class="td-desc">
         <div class="item-desc-wrap">
           <div class="item-name-row">
-            <input class="item-name" type="text" placeholder="ชื่อรายการ / สินค้า / บริการ" oninput="saveData()">
+            <input class="item-name" type="text" placeholder="${t('itemNamePlaceholder')}" oninput="saveData()">
           </div>
           <div class="item-detail-row">
-            <textarea class="item-detail" rows="1" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)" oninput="autoResize(this); saveData()"></textarea>
+            <textarea class="item-detail" rows="1" placeholder="${t('itemDetailPlaceholder')}" oninput="autoResize(this); saveData()"></textarea>
           </div>
         </div>
       </td>
       <td class="td-num-val"><input class="item-input qty-input" type="number" min="0" value="1" inputmode="numeric" oninput="calcRow(${id}); saveData()"></td>
-      <td class="td-num-val"><input class="item-input unit-input" type="text" placeholder="หน่วย" oninput="saveData()"></td>
+      <td class="td-num-val"><input class="item-input unit-input" type="text" placeholder="${t('unitPlaceholder')}" oninput="saveData()"></td>
       <td class="td-num-val">
         <span class="item-input price-display" onclick="showPriceInput(${id})" style="cursor:text;">0</span>
         <input class="item-input price-input" type="number" min="0" step="1" value="0" inputmode="numeric" style="display:none;" onblur="hidePriceInput(${id})" oninput="calcRow(${id}); saveData()">
@@ -776,9 +930,9 @@
     const whtEl = document.getElementById('whtDisplay');
     if (whtEl) whtEl.textContent = useWht ? ('-' + fmt(wht)) : '0.00';
     document.getElementById('vatDisplay').textContent = fmt(vat);
-    document.getElementById('quoteTotalDisplay').textContent = fmt(quoteTotal) + ' บาท';
-    document.getElementById('paymentEstimateDisplay').textContent = fmt(paymentEstimate) + ' บาท';
-    document.getElementById('thaiTextDisplay').textContent = '(' + ThaiBahtText(quoteTotal) + ')';
+    document.getElementById('quoteTotalDisplay').textContent = fmt(quoteTotal) + ' ' + t('currency');
+    document.getElementById('paymentEstimateDisplay').textContent = fmt(paymentEstimate) + ' ' + t('currency');
+    document.getElementById('thaiTextDisplay').textContent = '(' + (currentLanguage === 'th' ? ThaiBahtText(quoteTotal) : EnglishBahtText(quoteTotal)) + ')';
     const estimateRow = document.getElementById('rowPaymentEstimate');
     const showWht = document.getElementById('showWht')?.checked !== false;
     if (estimateRow) estimateRow.style.display = useWht && showWht ? '' : 'none';
@@ -809,12 +963,14 @@
   function applyCompanyPreset() {
     const field = document.getElementById('companyNote');
     if (!field) return;
-    field.value = 'ช่างเกล้า Built-in\n101/158 ซ.55 ถนนเลียบวารี แขวงโคกแฝก เขตหนองจอก กรุงเทพฯ 10530\nโทร.091-876-8157';
+    field.value = currentLanguage === 'th'
+      ? 'ช่างเกล้า Built-in\n101/158 ซ.55 ถนนเลียบวารี แขวงโคกแฝก เขตหนองจอก กรุงเทพฯ 10530\nโทร.091-876-8157'
+      : 'Chang Klao Built-in\n101/158 Soi 55, Liap Wari Road, Khok Faet, Nong Chok, Bangkok 10530\nTel. 091-876-8157';
     autoResize(field);
     syncCompanyNoteDisplay();
     saveData();
     document.getElementById('companyWidget')?.classList.remove('show');
-    showToast('ใส่ข้อมูลผู้เสนอราคาแล้ว ✓');
+    showToast(t('presetDone'));
   }
   function syncCompanyNoteDisplay() {
     const source = document.getElementById('companyNote');
@@ -859,6 +1015,7 @@
       });
     });
     return {
+      language: currentLanguage,
       companyNote: document.getElementById('companyNote')?.value || '',
       custName: document.getElementById('custName')?.value || '',
       docNo: document.getElementById('docNo')?.value || '',
@@ -901,6 +1058,7 @@
     }
     try {
       const d = JSON.parse(raw);
+      applyLanguage(d.language || 'th', false);
       const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
       set('companyNote', d.companyNote);
       autoResize(document.getElementById('companyNote'));
@@ -965,7 +1123,7 @@
   }
 
   function resetForm() {
-    if (!confirm('ล้างข้อมูลทั้งหมดใช่ไหม?')) return;
+    if (!confirm(t('confirmReset'))) return;
     try { localStorage.removeItem('quo_data'); } catch(e) {}
     document.getElementById('itemsBody').innerHTML = '';
     rowCount = 0;
@@ -988,17 +1146,18 @@
     updateSigDate('sigBuyerDate','sigBuyerDateDisplay');
     addRow(); addRow(); addRow();
     calcTotal();
-    showToast('ล้างข้อมูลแล้ว ✓');
+    saveData();
+    showToast(t('resetDone'));
   }
 
   async function exportPDF() {
     const btn = document.getElementById('pdfBtn');
     btn.disabled = true;
-    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> กำลังสร้าง...`;
+    btn.innerHTML = pdfButtonMarkup(t('creatingPdf'), true);
 
     const element = document.getElementById('form-area');
-    const note = (document.getElementById('companyNote')?.value || 'ใบเสนอราคา').slice(0, 30).replace(/[\\/:*?"<>|]/g, '');
-    const filename = `${note || 'ใบเสนอราคา'}_${todayBangkok()}.pdf`;
+    const note = (document.getElementById('companyNote')?.value || t('quotationFilename')).slice(0, 30).replace(/[\\/:*?"<>|]/g, '');
+    const filename = `${note || t('quotationFilename')}_${todayBangkok()}.pdf`;
 
     const opt = {
       margin: [10, 10, 10, 10],
@@ -1024,9 +1183,9 @@
     try {
       if (document.fonts?.ready) await document.fonts.ready;
       await html2pdf().set(opt).from(element).save();
-      showToast('ดาวน์โหลด PDF เรียบร้อย ✓');
+      showToast(t('pdfDone'));
     } catch(e) {
-      showToast('เกิดข้อผิดพลาด กรุณาลองใหม่');
+      showToast(t('pdfError'));
     }
     if (badge) {
       if (prevBadgeStyle !== null) badge.setAttribute('style', prevBadgeStyle);
@@ -1035,7 +1194,7 @@
     element.classList.remove('pdf-export');
     document.querySelectorAll('.no-print').forEach(el => el.style.display = '');
     btn.disabled = false;
-    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Export PDF`;
+    btn.innerHTML = pdfButtonMarkup(t('exportPdf'));
   }
 
   function showToast(msg) {
@@ -1045,6 +1204,7 @@
     setTimeout(() => t.classList.remove('show'), 2800);
   }
 
+  applyLanguage('th', false);
   loadData();
   applySummaryVisibility();
 </script>
