@@ -373,8 +373,9 @@
       <div class="company-widget" id="companyWidget">
         <h4>ข้อมูลผู้เสนอราคา</h4>
         <button type="button" class="company-preset" onclick="applyCompanyPreset()">
-          101/158 ซอย เลียบวารี 55, โคกแฝก, หนองจอก, กทม.<br>
-          klaobuiltin.th@gmail.com
+          ช่างเกล้า Built-in<br>
+          101/158 ซ.55 ถนนเลียบวารี แขวงโคกแฝก เขตหนองจอก กรุงเทพฯ 10530<br>
+          โทร.091-876-8157
         </button>
       </div>
     </div>
@@ -808,7 +809,7 @@
   function applyCompanyPreset() {
     const field = document.getElementById('companyNote');
     if (!field) return;
-    field.value = '101/158 ซอย เลียบวารี 55, โคกแฝก, หนองจอก, กทม.\nklaobuiltin.th@gmail.com';
+    field.value = 'ช่างเกล้า Built-in\n101/158 ซ.55 ถนนเลียบวารี แขวงโคกแฝก เขตหนองจอก กรุงเทพฯ 10530\nโทร.091-876-8157';
     autoResize(field);
     syncCompanyNoteDisplay();
     saveData();
