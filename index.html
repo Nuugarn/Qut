@@ -153,7 +153,7 @@
     font-size: 10px; color: var(--muted); font-weight: 700;
     text-transform: uppercase; letter-spacing: 0; margin-bottom: 6px;
   }
-  .sig-space { height: 44px; border-bottom: 1.5px solid var(--text); margin-bottom: 8px; opacity: .25; }
+  .sig-space { height: 84px; border-bottom: 1.5px solid var(--text); margin-bottom: 8px; opacity: .25; }
   .sig-name-input {
     border: none; border-bottom: 1.5px dashed var(--border);
     font-family: 'Sarabun', sans-serif; font-size: 12px; text-align: center;
@@ -251,12 +251,78 @@
     cursor: pointer; color: var(--text);
   }
   .summary-widget input[type="checkbox"] { width: 16px; height: 16px; }
+  .header-menu { position: relative; }
+  .company-widget {
+    display: none; position: absolute; top: 44px; right: 0; z-index: 200;
+    width: 320px; max-width: calc(100vw - 24px);
+    background: #fff; border: 1.5px solid var(--border); border-radius: 12px;
+    box-shadow: 0 8px 28px rgba(26,60,94,.18); padding: 14px;
+  }
+  .company-widget.show { display: block; }
+  .company-widget h4 { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 10px; }
+  .company-preset {
+    width: 100%; border: 1px solid var(--border); border-radius: 8px; background: var(--light);
+    padding: 10px; text-align: left; color: var(--text); cursor: pointer;
+    font-family: 'Sarabun', sans-serif; font-size: 12px; line-height: 1.55;
+  }
+  .company-preset:hover { border-color: var(--primary); background: #eef4fa; }
+  .company-note-print {
+    display: none; width: 100%; padding: 6px 12px; border-bottom: 1px dashed var(--border);
+    font-size: 12px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere;
+  }
+  .items-table tbody tr,
+  .summary-box,
+  .footer-bottom-row {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .pdf-export {
+    padding: 0 16px !important;
+    width: 718px !important;
+    max-width: 718px !important;
+    background: #fff !important;
+  }
+  .pdf-export .items-wrapper { overflow: visible; }
+  .pdf-export .summary-box { padding-right: 12px; }
+  .pdf-export #companyNote { display: none; }
+  .pdf-export .company-note-print { display: block; }
+  @media (max-width: 640px) {
+    .topbar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+      padding: 9px 10px;
+    }
+    .topbar-actions {
+      width: 100%;
+      justify-content: flex-end;
+      gap: 5px;
+    }
+    .btn,
+    .summary-settings-btn {
+      padding: 7px 9px;
+      font-size: 12px;
+    }
+    .company-widget {
+      position: fixed;
+      top: 88px;
+      left: 12px;
+      right: 12px;
+      width: auto;
+      max-width: none;
+    }
+    .wrapper { padding-top: 112px; }
+    .items-wrapper { overflow-x: auto; }
+    .items-table { min-width: 700px; }
+  }
   @media print {
-    @page { size: A4; margin: 12mm; }
+    @page { size: A4; margin: 10mm; }
     body { background: #fff !important; font-size: 12px; }
     .topbar, .btn-add-row, .btn-del, .no-print { display: none !important; }
     .wrapper { padding: 0 !important; max-width: 100%; }
     .date-native, .date-clear { display: none !important; }
+    #companyNote { display: none !important; }
+    .company-note-print { display: block !important; }
     .date-value { border-bottom: none !important; color: var(--text) !important; }
     .summary-row input[type="number"] {
       border: none !important; background: transparent !important; appearance: textfield;
@@ -276,6 +342,7 @@
       -webkit-print-color-adjust: exact; print-color-adjust: exact;
     }
     .items-table thead tr { background: #1a3c5e !important; }
+    .items-table thead { display: table-header-group; }
     .td-num { background: #eef3f8 !important; }
     .item-detail-row { background: #f8fafc !important; }
   }
@@ -294,8 +361,22 @@
     <div class="summary-widget no-print" id="summaryWidget">
       <h4>แสดงในยอดสรุป</h4>
       <label><input type="checkbox" id="showSubTotal" checked onchange="applySummaryVisibility(); saveData()"> รวมราคาสินค้า/บริการ</label>
+      <label><input type="checkbox" id="showExtraCost" checked onchange="applySummaryVisibility(); saveData()"> ค่าขนส่ง/ค่าใช้จ่ายเพิ่มเติม</label>
       <label><input type="checkbox" id="showWht" checked onchange="applySummaryVisibility(); saveData()"> หัก ณ ที่จ่าย</label>
       <label><input type="checkbox" id="showVat" checked onchange="applySummaryVisibility(); saveData()"> รวม VAT 7%</label>
+    </div>
+    <div class="header-menu no-print">
+      <button class="summary-settings-btn" onclick="toggleCompanyWidget(event)" title="เลือกข้อมูลผู้เสนอราคา">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>
+        ข้อมูล
+      </button>
+      <div class="company-widget" id="companyWidget">
+        <h4>ข้อมูลผู้เสนอราคา</h4>
+        <button type="button" class="company-preset" onclick="applyCompanyPreset()">
+          101/158 ซอย เลียบวารี 55, โคกแฝก, หนองจอก, กทม.<br>
+          klaobuiltin.th@gmail.com
+        </button>
+      </div>
     </div>
     <button class="btn btn-reset" onclick="resetForm()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
@@ -314,10 +395,11 @@
     <div class="doc-top">
       <div style="width:50%; display:flex; flex-direction:column; gap:4px">
         <textarea id="companyNote" rows="1" placeholder="ชื่อบริษัท / ที่อยู่ (ผู้ออกใบเสนอราคา)"
-          oninput="autoResize(this); saveData()"
+          oninput="autoResize(this); syncCompanyNoteDisplay(); saveData()"
           style="width:100%; padding:6px 0; border:none; border-bottom:1px dashed var(--border);
                  font-family:'Sarabun',sans-serif; font-size:12px; color:var(--text);
                  background:transparent; resize:none; overflow:hidden;"></textarea>
+        <div class="company-note-print" id="companyNotePrint"></div>
         <div style="padding:4px 0;">
           <div style="font-size:11px; font-weight:700; color:var(--muted); margin-bottom:2px">ลูกค้า</div>
           <textarea id="custName" rows="1" placeholder="กรอกชื่อลูกค้าหรือบริษัท"
@@ -417,14 +499,14 @@
         <span id="vatDisplay">0.00</span>
       </div>
       <div class="summary-row total">
-        <span>ยอดรวมตามใบเสนอราคา</span>
+        <span>ยอดรวมทั้งสิ้น</span>
         <span id="quoteTotalDisplay">0.00 บาท</span>
       </div>
       <div class="thai-text" id="thaiTextDisplay">(ศูนย์บาทถ้วน)</div>
       <div class="summary-row" id="rowWht">
         <label class="vat-toggle">
           <input type="checkbox" id="whtToggle" onchange="calcTotal(); saveData()">
-          หัก ณ ที่จ่าย
+          ประมาณการหัก ณ ที่จ่าย
           <input class="wht-rate-input" type="number" id="whtRate" min="0" max="100" step="0.01" value="3" inputmode="decimal" oninput="calcTotal(); saveData()">%
         </label>
         <span id="whtDisplay">0.00</span>
@@ -714,18 +796,43 @@
   function toggleSummaryWidget(e) {
     e.stopPropagation();
     const w = document.getElementById('summaryWidget');
+    document.getElementById('companyWidget')?.classList.remove('show');
     w.classList.toggle('show');
   }
+  function toggleCompanyWidget(e) {
+    e.stopPropagation();
+    const w = document.getElementById('companyWidget');
+    document.getElementById('summaryWidget')?.classList.remove('show');
+    w.classList.toggle('show');
+  }
+  function applyCompanyPreset() {
+    const field = document.getElementById('companyNote');
+    if (!field) return;
+    field.value = '101/158 ซอย เลียบวารี 55, โคกแฝก, หนองจอก, กทม.\nklaobuiltin.th@gmail.com';
+    autoResize(field);
+    syncCompanyNoteDisplay();
+    saveData();
+    document.getElementById('companyWidget')?.classList.remove('show');
+    showToast('ใส่ข้อมูลผู้เสนอราคาแล้ว ✓');
+  }
+  function syncCompanyNoteDisplay() {
+    const source = document.getElementById('companyNote');
+    const display = document.getElementById('companyNotePrint');
+    if (source && display) display.textContent = source.value;
+  }
   document.addEventListener('click', (e) => {
-    const w = document.getElementById('summaryWidget');
-    if (w && w.classList.contains('show') && !w.contains(e.target) && !e.target.closest('.summary-settings-btn')) {
-      w.classList.remove('show');
+    const summary = document.getElementById('summaryWidget');
+    const company = document.getElementById('companyWidget');
+    if (summary && summary.classList.contains('show') && !summary.contains(e.target) && !e.target.closest('.summary-settings-btn')) {
+      summary.classList.remove('show');
     }
+    if (company && company.classList.contains('show') && !company.contains(e.target) && !e.target.closest('.header-menu')) company.classList.remove('show');
   });
 
   function applySummaryVisibility() {
     const map = [
       ['showSubTotal', 'rowSubTotal'],
+      ['showExtraCost', 'rowExtraCost'],
       ['showWht', 'rowWht'],
       ['showVat', 'rowVat']
     ];
@@ -764,6 +871,7 @@
       whtRate: document.getElementById('whtRate')?.value || '3',
       vatToggle: document.getElementById('vatToggle')?.checked || false,
       showSubTotal: document.getElementById('showSubTotal')?.checked !== false,
+      showExtraCost: document.getElementById('showExtraCost')?.checked !== false,
       showWht: document.getElementById('showWht')?.checked !== false,
       showVat: document.getElementById('showVat')?.checked !== false,
       sigSeller: document.getElementById('sigSeller')?.value || '',
@@ -794,6 +902,8 @@
       const d = JSON.parse(raw);
       const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
       set('companyNote', d.companyNote);
+      autoResize(document.getElementById('companyNote'));
+      syncCompanyNoteDisplay();
       set('custName', d.custName);
       // รองรับข้อมูลเดิมที่เก็บเฉพาะเลขท้ายเอกสาร
       const legacyDigits = (d.docNoNum || '').replace(/\D/g, '');
@@ -809,7 +919,7 @@
       if (document.getElementById('whtToggle')) document.getElementById('whtToggle').checked = !!d.whtToggle;
       if (document.getElementById('vatToggle')) document.getElementById('vatToggle').checked = !!d.vatToggle;
       // restore summary visibility
-      ['showSubTotal','showWht','showVat'].forEach(k => {
+      ['showSubTotal','showExtraCost','showWht','showVat'].forEach(k => {
         const el = document.getElementById(k);
         if (el) el.checked = d[k] !== false;
       });
@@ -863,6 +973,7 @@
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
+    syncCompanyNoteDisplay();
     if (document.getElementById('docNo')) document.getElementById('docNo').value = `QT-${todayBangkok().slice(0, 4)}-0001`;
     if (document.getElementById('docRef')) document.getElementById('docRef').value = '';
     if (document.getElementById('extraCost')) document.getElementById('extraCost').value = '0';
@@ -889,14 +1000,15 @@
     const filename = `${note || 'ใบเสนอราคา'}_${todayBangkok()}.pdf`;
 
     const opt = {
-      margin: [8, 8, 8, 8],
+      margin: [10, 10, 10, 10],
       filename,
       image: { type: 'jpeg', quality: 0.97 },
-      html2canvas: { scale: 2, useCORS: true, logging: false },
+      html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff', windowWidth: 780, scrollX: 0, scrollY: 0 },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      pagebreak: { mode: ['css', 'legacy'], avoid: ['.item-row', '.summary-box', '.footer-bottom-row'] }
     };
 
+    element.classList.add('pdf-export');
     document.querySelectorAll('.no-print').forEach(el => el.style.display = 'none');
     // บังคับสีตัวอักษร "ใบเสนอราคา" ให้แสดงใน PDF (html2canvas ไม่รองรับ background-clip text ดี)
     const badge = document.querySelector('.badge-title');
@@ -909,6 +1021,7 @@
       badge.style.color = '#1a3c5e';
     }
     try {
+      if (document.fonts?.ready) await document.fonts.ready;
       await html2pdf().set(opt).from(element).save();
       showToast('ดาวน์โหลด PDF เรียบร้อย ✓');
     } catch(e) {
@@ -918,6 +1031,7 @@
       if (prevBadgeStyle !== null) badge.setAttribute('style', prevBadgeStyle);
       else badge.removeAttribute('style');
     }
+    element.classList.remove('pdf-export');
     document.querySelectorAll('.no-print').forEach(el => el.style.display = '');
     btn.disabled = false;
     btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Export PDF`;
