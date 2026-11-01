@@ -1,0 +1,33 @@
+/* Shared quotation-style header. Each document supplies its primary colour. */
+.topbar {
+  position:sticky; top:0; z-index:100; min-height:0;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:12px 16px; border:0; background:var(--primary); line-height:1.5;
+  box-shadow:0 2px 12px rgba(0,0,0,.3);
+}
+.topbar-title { color:#fff; font-weight:700; font-size:16px; letter-spacing:0; }
+.topbar-actions { display:flex; gap:8px; align-items:center; }
+.topbar .summary-settings-btn,.topbar .company-button {
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  min-height:0; padding:8px 12px; border:0; border-radius:8px;
+  background:rgba(255,255,255,.15); color:#fff;
+  font-family:'Sarabun',sans-serif; font-size:13px; font-weight:600; cursor:pointer;
+}
+.topbar .summary-settings-btn:hover,.topbar .company-button:hover { background:rgba(255,255,255,.25); }
+.topbar .btn-pdf,.topbar .btn-reset {
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  min-height:0; padding:8px 16px; border:0; border-radius:8px;
+  font-family:'Sarabun',sans-serif; font-size:13px; font-weight:600;
+  color:#fff; cursor:pointer;
+}
+.topbar .btn-pdf { background:#e8a020; }
+.topbar .btn-pdf:hover { background:#c88a10; }
+.topbar .btn-reset { background:rgba(255,255,255,.15); }
+.topbar .btn-reset:hover { background:rgba(255,255,255,.25); }
+.topbar .language-toggle { min-width:54px; }
+@media screen and (max-width:640px) {
+  .topbar { flex-direction:column; align-items:stretch; gap:8px; padding:9px 10px; }
+  .topbar-actions { width:100%; justify-content:flex-end; gap:5px; flex-wrap:wrap; }
+  .topbar .summary-settings-btn,.topbar .company-button,.topbar .btn-pdf,.topbar .btn-reset { padding:7px 9px; font-size:12px; }
+}
+@media print { .topbar { display:none !important; } }

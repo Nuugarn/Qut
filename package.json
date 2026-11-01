@@ -1,0 +1,12 @@
+{
+  "name": "qut-bill",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node serve.cjs",
+    "test": "node --test tests/money.test.cjs tests/bill.test.cjs tests/amount-words.test.cjs",
+    "test:browser": "node tests/browser.cjs",
+    "test:modes": "node tests/modes.cjs",
+    "test:pages": "node tests/pages.cjs"
+  }
+}

@@ -1,0 +1,31 @@
+.validation-message { color:#a42b20; font-size:12px; margin-bottom:8px; }
+.summary-widget select { width:100%; padding:6px; font:inherit; border:1px solid #c8d8e8; border-radius:4px; }
+.discount-controls { display:flex; gap:5px; }
+.discount-controls select,.discount-controls input { font:inherit; padding:4px; border:1px solid #c8d8e8; border-radius:4px; background:#fff; }
+.discount-controls input { width:85px; text-align:right; }
+#rowDiscount { flex-wrap:wrap; gap:6px; }
+#discountDisplay { width:100%; text-align:right; }
+.extra-cost-input,.wht-rate-input { background:white; border:1px solid #c8d8e8; border-radius:4px; padding:4px; font:inherit; text-align:right; }
+.extra-cost-input { width:100px; } .wht-rate-input { width:50px; }
+.item-total[readonly] { cursor:default; }
+@media print {
+  .document-ending { break-inside:avoid; }
+  .omit-print { display:none !important; }
+  .items-wrapper { overflow:visible !important; }
+  .items-table { min-width:0 !important; }
+  .item-row { break-inside:avoid; }
+  .doc-header,.summary-box,.footer-bottom-row { break-inside:avoid; }
+  .item-desc-wrap { display:block; }
+  .item-name + .print-value { font-weight:600; font-size:13px; }
+  .item-detail + .print-value { font-size:11px; color:#5a7590; }
+  .item-num-input + .print-value { text-align:center; padding:5px 2px; }
+  .price-display { display:none !important; }
+  .discount-controls { display:none; }
+  #discountDisplay { width:auto; }
+  .summary-box .print-value { min-width:30px; text-align:right; }
+  .sig-name-input + .print-value { text-align:center; font-size:12px; }
+  .summary-row input[type="checkbox"] { display:none; }
+  .date-value { white-space:normal; }
+  .summary-row { gap:10px; }
+  .print-value { font-family:'Sarabun',sans-serif; }
+}
