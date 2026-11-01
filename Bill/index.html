@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ใบวางบิล</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="../shared/workspace.css">
+<link rel="stylesheet" href="../shared/header.css">
+<link rel="stylesheet" href="../shared/document-modes.css">
+<script src="../shared/workspace.js"></script>
+</head>
+<body data-section="bill">
+
+<header class="topbar">
+  <span class="topbar-title" data-i18n="documentTitle">ใบวางบิล</span>
+  <div class="topbar-actions">
+    <button class="summary-settings-btn language-toggle no-print" id="languageToggle" type="button" onclick="setLanguage(currentLang === 'th' ? 'en' : 'th')" data-i18n-title="switchLanguageAria" data-i18n-aria-label="switchLanguageAria">
+      <span aria-hidden="true">🌐</span><span data-i18n="switchLanguageText">EN</span>
+    </button>
+    <div class="header-menu no-print">
+      <button id="company-menu-button" class="company-button" type="button" aria-expanded="false" aria-controls="companyWidget" aria-label="เลือกข้อมูลผู้วางบิล" data-i18n-aria-label="companySettingsTitle" onclick="toggleCompanyWidget(event)" title="เลือกข้อมูลผู้วางบิล" data-i18n-title="companySettingsTitle">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>
+        <span data-i18n="companyButton">ข้อมูล</span>
+      </button>
+      <div class="company-widget" id="companyWidget">
+        <h4 data-i18n="companyMenuTitle">ข้อมูลผู้วางบิล</h4>
+        <button type="button" class="company-preset" onclick="applyCompanyPreset()" data-i18n-html="companyPreset">
+          ช่างเกล้า Built-in<br>
+          101/158 ซ.55 ถนนเลียบวารี แขวงโคกแฝก เขตหนองจอก กรุงเทพฯ 10530<br>
+          โทร.091-876-8157
+        </button>
+      </div>
+    </div>
+    <button class="btn-pdf" type="button" onclick="printDocument()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      <span data-i18n="savePdf">บันทึก PDF</span>
+    </button>
+  </div>
+</header>
+
+<main class="wrapper" id="main">
+  <p id="validation-message" class="validation-message" role="status" aria-live="polite" tabindex="-1"></p>
+  <article class="document-sheet" aria-label="ใบวางบิล" data-i18n-aria-label="documentTitle">
+
+  <!-- DOC HEADER -->
+  <div class="doc-header">
+    <div class="doc-top">
+      <div class="company-fields">
+        <label for="companyName" class="field-label" data-i18n="biller">ผู้วางบิล</label>
+        <input class="company-name-input" id="companyName" type="text" placeholder="ชื่อบริษัท / ผู้รับเหมา" data-i18n-placeholder="companyNamePlaceholder">
+        <textarea class="company-sub-input" id="companyContact" rows="2" aria-label="ที่อยู่ / เบอร์โทร / อีเมล" data-i18n-aria-label="companyContactPlaceholder" placeholder="ที่อยู่ / เบอร์โทร / อีเมล" data-i18n-placeholder="companyContactPlaceholder" oninput="resizeCompanyContact()"></textarea>
+      </div>
+      <div class="doc-badge">
+        <div class="badge-title" data-i18n="documentTitle">ใบวางบิล</div>
+        <label class="badge-sub" for="document-number" data-i18n="documentNumber">เลขที่เอกสาร</label>
+        <input class="doc-no-input" id="document-number" type="text" placeholder="IV-0001">
+        <label class="badge-sub" for="issue-date" data-i18n="issueDate">วันที่เอกสาร</label>
+        <input class="doc-no-input" id="issue-date" type="date" onchange="updateSigDate('issue-date','issue-date-display')">
+        <div id="issue-date-display" class="date-display"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROJECT INFO -->
+  <div class="card">
+    <div class="card-header">
+      <h2 data-i18n="projectInfo">ข้อมูลโครงการ</h2>
+    </div>
+    <div class="card-body project-grid">
+      <div class="field">
+        <label for="project-name" data-i18n="projectName">ชื่อโครงการ / งาน</label>
+        <input id="project-name" type="text" placeholder="กรอกชื่อโครงการหรืองาน" data-i18n-placeholder="projectNamePlaceholder">
+      </div>
+      <div class="field">
+        <label for="client-name" data-i18n="client">ผู้ว่าจ้าง / เจ้าของโครงการ</label>
+        <input id="client-name" type="text" placeholder="ชื่อผู้ว่าจ้าง / บริษัท" data-i18n-placeholder="clientPlaceholder">
+      </div>
+      <div class="field">
+        <label for="client-contact" data-i18n="clientContact">ที่อยู่ / ข้อมูลติดต่อลูกค้า</label>
+        <textarea id="client-contact" rows="2"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ITEMS TABLE -->
+  <div class="card items-card">
+    <div class="card-header">
+      <h2 data-i18n="billingItems">รายการวางบิลตามงวด</h2>
+    </div>
+    <div class="card-body" style="padding-top:12px">
+      <p id="amount-hint" class="section-hint no-print" data-i18n="amountHint">ยอดรวมคำนวณจากจำนวนเงินที่กรอก เปอร์เซ็นต์ใช้เป็นข้อมูลอ้างอิง</p>
+      <div class="tbl-wrapper">
+        <table class="billing-table" aria-label="รายการวางบิลตามงวด" data-i18n-aria-label="billingItems">
+          <colgroup><col class="col-number"><col><col class="col-percent"><col class="col-amount"><col class="col-action no-print"></colgroup>
+          <thead><tr class="tbl-head">
+            <th scope="col" data-i18n="installment">งวดที่</th>
+            <th scope="col" data-i18n="description">รายละเอียดงวด</th>
+            <th scope="col" data-i18n="percentage">เปอร์เซ็นต์</th>
+            <th scope="col" data-i18n="amount">จำนวนเงิน</th>
+            <th scope="col" class="no-print"><span class="sr-only" data-i18n="deleteRow">ลบงวด</span></th>
+          </tr></thead>
+          <tbody class="tbl-body" id="tbl-body"></tbody>
+        </table>
+      </div>
+
+      <button class="btn-add-row no-print" type="button" onclick="addRow('', '', '', true)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span data-i18n="addInstallment">เพิ่มงวด</span>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- FOOTER: หมายเหตุ(ซ้าย) + ยอดรวม+ลายเซ็น(ขวา) -->
+
+  <!-- แถวบน: header หมายเหตุ (ซ้าย) | ยอดรวม (ขวา) -->
+  <div class="footer-top-row">
+    <div class="footer-top-left">
+      <div class="footer-top-left-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <h3 data-i18n="notes">หมายเหตุ</h3>
+    </div>
+    <div class="footer-top-right">
+      <span class="footer-top-right-label" data-i18n="grandTotal">ยอดรวมทั้งสิ้น</span>
+      <span class="footer-top-right-amount" id="grand-total-footer">0.00 ฿</span>
+    </div>
+  </div>
+
+  <!-- แถวล่าง: ช่องหมายเหตุ (ซ้าย) | ลายเซ็น (ขวา) -->
+  <div id="bill-amount-words" class="bill-amount-words" aria-live="polite"></div>
+  <div class="footer-bottom-row">
+    <div class="footer-bottom-left">
+      <div class="field" style="margin-bottom:10px">
+        <label for="payment-method" data-i18n="paymentMethod">ชำระโดยวิธี / บัญชีธนาคาร</label>
+        <textarea id="payment-method" rows="2" placeholder="เช่น โอนเงิน กสิกรไทย 123-4-56789-0" data-i18n-placeholder="paymentMethodPlaceholder"></textarea>
+      </div>
+      <div class="field" style="margin-bottom:10px">
+        <label for="payment-terms" data-i18n="paymentTerms">เงื่อนไขการชำระเงิน</label>
+        <textarea id="payment-terms" rows="2" placeholder="เช่น ชำระภายใน 30 วัน" data-i18n-placeholder="paymentTermsPlaceholder"></textarea>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label for="additional-notes" data-i18n="additionalNotes">หมายเหตุเพิ่มเติม</label>
+        <textarea id="additional-notes" rows="2" placeholder="รายละเอียดเพิ่มเติม / ข้อสังเกต" data-i18n-placeholder="additionalNotesPlaceholder"></textarea>
+      </div>
+      <div class="field" style="margin-top:10px">
+        <label for="payment-due-date" data-i18n="paymentDueDate">วันครบกำหนดชำระ</label>
+        <input id="payment-due-date" type="date">
+      </div>
+    </div>
+    <div class="footer-bottom-right">
+      <div class="sig-inline">
+        <div class="sig-inline-title" data-i18n="signatures">ลายเซ็นผู้เกี่ยวข้อง</div>
+        <div class="sig-cols">
+          <div class="sig-col">
+            <div class="sig-col-label" data-i18n="biller">ผู้วางบิล</div>
+            <div class="sig-space"></div>
+            <input class="sig-name-n" id="biller-name" type="text" placeholder="ชื่อ - นามสกุล" data-i18n-placeholder="fullName">
+            <div class="sig-date-lbl" data-i18n="date">วันที่</div>
+            <input type="date" class="sig-date-pk" id="sigBillerDate"
+              onchange="updateSigDate('sigBillerDate','sigBillerDisp')">
+            <div class="sig-date-disp" id="sigBillerDisp"></div>
+          </div>
+          <div class="sig-col">
+            <div class="sig-col-label" data-i18n="approver">ผู้อนุมัติ</div>
+            <div class="sig-space"></div>
+            <input class="sig-name-n" id="approver-name" type="text" placeholder="ชื่อ - นามสกุล" data-i18n-placeholder="fullName">
+            <div class="sig-date-lbl" data-i18n="date">วันที่</div>
+            <input type="date" class="sig-date-pk" id="sigApproverDate"
+              onchange="updateSigDate('sigApproverDate','sigApproverDisp')">
+            <div class="sig-date-disp" id="sigApproverDisp"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </article>
+  <div class="workspace-footer no-print">
+    <span data-i18n-html="printHint">กด <strong>บันทึก PDF</strong> ด้านบน เพื่อบันทึกหรือพิมพ์เอกสาร</span>
+  </div>
+</main>
+
+<script src="../shared/amount-words.js"></script>
+<script src="./app.js"></script>
+<script src="./session.js"></script>
+<script src="../shared/document-modes.js"></script>
+</body>
+</html>
