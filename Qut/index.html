@@ -61,6 +61,11 @@
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
   .items-wrapper { width: 100%; border: 1px solid #8a9bb0; overflow: hidden; }
+  .paint-tools { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:6px 0; font-size:12px; }
+  .paint-tools button, .paint-tools select { font:inherit; padding:4px; }
+  .paint-tools input { vertical-align:middle; width:32px; height:24px; padding:0; }
+  .paint-tools [aria-pressed="true"] { background:#1a3c5e; color:white; }
+  .items-table td { print-color-adjust:exact; -webkit-print-color-adjust:exact; }
   .items-table {
     width: 100%; border-collapse: collapse; table-layout: fixed;
     font-size: 13px; font-family: 'Sarabun', sans-serif;
@@ -104,7 +109,7 @@
   }
   .item-name::placeholder { font-weight: 400; color: #a0b4c8; }
   .item-name:focus { outline: 2px solid #4a90d9; outline-offset: 1px; }
-  .item-detail-row { padding: 3px 8px 4px; background: #f8fafc; }
+  .item-detail-row { padding: 3px 8px 4px; background: transparent; }
   .item-detail {
     display: block; width: 100%; border: none; padding: 0;
     font-family: 'Sarabun', sans-serif; font-size: 11px; color: #5a7590;
@@ -316,6 +321,8 @@
     @page { size: A4; margin: 10mm; }
     body { background: #fff !important; font-size: 12px; }
     .topbar, .btn-add-row, .btn-del, .no-print { display: none !important; }
+    .item-detail-row:has(.item-detail:placeholder-shown) { display:none !important; }
+    .item-desc-wrap:has(.item-detail:placeholder-shown) .item-name-row { border-bottom:0; }
     .wrapper { padding: 0 !important; max-width: 100%; }
     .date-native, .date-clear { display: none !important; }
     #companyNote { display: none !important; }
@@ -365,7 +372,7 @@
     <div class="summary-widget no-print" id="summaryWidget">
       <h4 data-i18n="summaryMenuTitle">แสดงในยอดสรุป</h4>
       <label><input type="checkbox" id="showSubTotal" checked onchange="applySummaryVisibility(); saveData()"> <span data-i18n="subtotal">รวมราคาสินค้า/บริการ</span></label>
-      <label><input type="checkbox" id="showExtraCost" checked onchange="applySummaryVisibility(); saveData()"> <span data-i18n="extraCost">ค่าขนส่ง/ค่าใช้จ่ายเพิ่มเติม</span></label>
+      <input type="checkbox" id="showExtraCost" checked hidden>
       <label><input type="checkbox" id="showWht" checked onchange="applySummaryVisibility(); saveData()"> <span data-i18n="whtShort">หัก ณ ที่จ่าย</span></label>
       <label><input type="checkbox" id="discountEnabled" onchange="applySummaryVisibility(); saveData()"> <span data-i18n="enableDiscount">ใช้ส่วนลดท้ายใบ</span></label>
       <label for="vatMode">VAT 7%</label><select id="vatMode" onchange="applySummaryVisibility(); saveData()">
@@ -423,7 +430,7 @@
           <div style="display:flex; align-items:center; gap:6px">
             <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0" data-i18n="quotationNo">เลขที่</span>
             <input type="text" id="docNo" value="QT-2026-0001" oninput="saveData()" onclick="this.select()"
-              style="width:68%; margin-left:auto; border:none; background:transparent; font-size:11px; line-height:1.6; color:var(--text); font-family:'Sarabun',sans-serif; padding:2px 5px; text-align:left;">
+              style="width:58%; margin-left:auto; border:none; background:transparent; font-size:11px; line-height:1.6; color:var(--text); font-family:'Sarabun',sans-serif; padding:2px 0; text-align:left;">
           </div>
           <div style="display:flex; align-items:center; gap:6px">
             <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0" data-i18n="date">วันที่</span>
@@ -443,12 +450,12 @@
           </div>
           <div style="display:flex; align-items:center; gap:6px">
             <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0" data-i18n="issuedBy">ผู้ออก</span>
-            <input type="text" id="issuerName" oninput="saveData()" style="width:68%; margin-left:auto; font-size:11px; line-height:1.6; color:var(--text); border:none; background:transparent; font-family:'Sarabun',sans-serif; padding:2px 5px;">
+            <input type="text" id="issuerName" oninput="saveData()" style="width:58%; margin-left:auto; font-size:11px; line-height:1.6; color:var(--text); border:none; background:transparent; font-family:'Sarabun',sans-serif; padding:2px 0;">
           </div>
           <div style="display:flex; align-items:center; gap:6px">
             <span style="font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0" data-i18n="reference">อ้างอิง</span>
             <input type="text" id="docRef" placeholder="PO / RFQ" oninput="saveData()"
-              style="width:68%; margin-left:auto; border:none; background:transparent; font-size:11px; line-height:1.6; color:var(--text); font-family:'Sarabun',sans-serif; padding:2px 5px; text-align:left;">
+              style="width:58%; margin-left:auto; border:none; background:transparent; font-size:11px; line-height:1.6; color:var(--text); font-family:'Sarabun',sans-serif; padding:2px 0; text-align:left;">
           </div>
         </div>
       </div>
@@ -460,6 +467,13 @@
     <textarea id="quoteProject" rows="1" oninput="autoResize(this); saveData()"></textarea>
   </div>
   <div style="margin-bottom:14px">
+    <div class="paint-tools no-print" aria-label="ระบายสีตาราง">
+      <label>สี <input id="paint-color" type="color" value="#fff2a8"></label>
+      <label>ขอบเขต <select id="paint-scope"><option value="cell">ช่อง</option><option value="row">แนวนอน</option><option value="column">แนวตั้ง</option></select></label>
+      <button id="paint-toggle" type="button" aria-pressed="false">ระบายสี</button>
+      <button id="paint-clear" type="button">ล้างสี</button>
+      <span id="paint-help">เลือกสีและขอบเขต แล้วกดระบายสี</span>
+    </div>
     <div class="items-wrapper">
       <table class="items-table">
         <colgroup>
@@ -481,7 +495,7 @@
     <div style="padding:8px 0 0" class="no-print">
       <button class="btn-add-row" onclick="addRow(); saveData()">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        <span data-i18n="addItem">+ เพิ่มรายการ</span>
+        <span data-i18n="addItem">เพิ่มรายการ</span>
       </button>
     </div>
   </div>
@@ -585,6 +599,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="./app.js"></script>
+<script src="../shared/quote-number.js"></script>
 <script src="../shared/document-modes.js"></script>
 </body>
 </html>

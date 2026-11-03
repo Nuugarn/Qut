@@ -10,7 +10,10 @@
     const byId = id => document.getElementById(id);
     const field = id => byId(id)?.closest('.field');
     if (bill) {
-      tag('people', document.querySelector('.company-fields'), field('client-name'), field('client-contact'));
+      tag('people', document.querySelector('.company-fields'), field('client-name'));
+      tag('clientContact', field('client-contact'));
+      tag('clientTax', field('client-tax'));
+      tag('reference', field('reference-number'));
       tag('project', field('project-name'));
       tag('document', ...document.querySelectorAll('.doc-badge > :not(.badge-title)'));
       tag('terms', field('payment-terms'));
@@ -40,8 +43,8 @@
       state.amountWords = input.checked;
     }
     const labels = {
-      th: { mode:'รูปแบบ', simple:'อย่างง่าย', full:'ข้อมูลเต็ม', custom:'กำหนดเอง', people:'ข้อมูลผู้จัดทำ / ลูกค้า', project:'ข้อมูลโครงการ', document:'เลขที่ / วันที่ / อ้างอิง', terms:'เงื่อนไขชำระเงิน', bank:'บัญชีธนาคาร', notes:'หมายเหตุ', signatures:'ลายเซ็น', due:'วันครบกำหนดชำระ' },
-      en: { mode:'Layout', simple:'Simple', full:'Full', custom:'Custom', people:'Biller / Customer', project:'Project', document:'Number / Dates / Reference', terms:'Payment terms', bank:'Bank account', notes:'Notes', signatures:'Signatures', due:'Payment due date' }
+      th: { mode:'รูปแบบ', simple:'อย่างง่าย', full:'ข้อมูลเต็ม', custom:'กำหนดเอง', people:'ข้อมูลผู้จัดทำ / ลูกค้า', clientContact:'ที่อยู่ / ข้อมูลติดต่อลูกค้า', clientTax:'เลขประจำตัวผู้เสียภาษีลูกค้า / สาขา', reference:'เลขอ้างอิงใบเสนอราคา / สัญญา', project:'ข้อมูลโครงการ', document:'เลขที่ / วันที่ / อ้างอิง', terms:'เงื่อนไขชำระเงิน', bank:'บัญชีธนาคาร', notes:'หมายเหตุ', signatures:'ลายเซ็น', due:'วันครบกำหนดชำระ' },
+      en: { mode:'Layout', simple:'Simple', full:'Full', custom:'Custom', people:'Biller / Customer', clientContact:'Customer address / Contact', clientTax:'Customer tax ID / branch', reference:'Quotation / contract reference', project:'Project', document:'Number / Dates / Reference', terms:'Payment terms', bank:'Bank account', notes:'Notes', signatures:'Signatures', due:'Payment due date' }
     };
     for (const mode of ['simple','full','custom']) { const option = document.createElement('option'); option.value = mode; select.append(option); }
     for (const name of Object.keys(groups)) {
@@ -71,6 +74,11 @@
         input.nextElementSibling.textContent = text[name];
       }
       const simple = state.mode === 'simple';
+      // Simple documents retain the contractor's editable identity only.
+      const identity = bill ? document.querySelector('.company-fields') : byId('companyNote').parentElement;
+      if (simple) identity.classList.remove('mode-hidden');
+      if (bill) byId('companyContact').classList.toggle('mode-hidden', simple);
+      else byId('custName').parentElement.classList.toggle('mode-hidden', simple);
       document.querySelector('.badge-title').textContent = simple
         ? (bill ? (en ? 'Preliminary Payment Schedule' : 'รายการชำระเงินเบื้องต้น') : (en ? 'Preliminary Quotation' : 'ใบเสนอราคาเบื้องต้น'))
         : (bill ? (en ? 'BILLING STATEMENT' : 'ใบวางบิล') : (en ? 'QUOTATION' : 'ใบเสนอราคา'));

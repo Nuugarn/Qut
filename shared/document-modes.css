@@ -17,7 +17,7 @@
 .topbar-actions { flex-wrap:wrap; }
 .summary-box { margin-left:auto; }
 .footer-top-left.mode-hidden + .footer-top-right { grid-column:2; }
-body[data-document-mode="simple"] .doc-top { justify-content:flex-end; }
+body[data-document-mode="simple"] .doc-top { justify-content:space-between; }
 body[data-document-mode="simple"] .doc-badge { width:auto; max-width:100%; }
 .print-warning { border:0; border-radius:12px; padding:24px; max-width:min(500px,90vw); font-family:'Sarabun',sans-serif; color:#24364a; }
 .print-warning::backdrop { background:#0006; }
@@ -26,3 +26,9 @@ body[data-document-mode="simple"] .doc-badge { width:auto; max-width:100%; }
 @media screen and (max-width:768px) { .footer-top-left.mode-hidden + .footer-top-right { grid-column:1; } }
 @media screen and (max-width:640px) { .mode-panel { position:fixed; top:125px; left:12px; right:12px; width:auto; max-height:calc(100dvh - 145px); } }
 @media print { .mode-hidden,.print-warning,.mode-controls { display:none !important; } }
+.document-number-editor { width:58%; margin-left:auto; display:flex; align-items:center; font-size:11px; line-height:1.6; white-space:nowrap; }
+.number-serial { width:4.5ch; min-width:0; border:0; background:transparent; color:inherit; font:inherit; padding:2px 0; }
+.number-printed { display:none; }
+@media print { .number-printed { display:inline; } }
+
+body[data-section="bill"] .document-number-editor { width:100%; justify-content:flex-end; font-size:13px; padding:6px 10px; }

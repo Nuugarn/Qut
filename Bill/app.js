@@ -94,7 +94,7 @@ let rowId = 0;
 
   const MAX_AMOUNT_CENTS = 999999999999;
   Object.assign(translations.th, {
-    clientContact: 'ที่อยู่ / ข้อมูลติดต่อลูกค้า', paymentDueDate: 'วันครบกำหนดชำระ',
+    referenceNumber: 'เลขอ้างอิงใบเสนอราคา / สัญญา', clientTax: 'เลขประจำตัวผู้เสียภาษีลูกค้า / สาขา', includeRow: 'เรียกเก็บ', noItems: 'กรุณาเลือกและกรอกอย่างน้อยหนึ่งรายการ', clientContact: 'ที่อยู่ / ข้อมูลติดต่อลูกค้า', paymentDueDate: 'วันครบกำหนดชำระ',
     incompleteTitle: 'ตรวจสอบข้อมูลก่อนพิมพ์',
     incompleteIntro: 'ข้อมูลต่อไปนี้ยังไม่ครบ คุณสามารถกลับไปแก้ไขหรือพิมพ์ต่อได้',
     backToEdit: 'กลับไปแก้', printAnyway: 'พิมพ์ต่อ', missingAmounts: 'จำนวนเงินของรายการที่กรอก',
@@ -110,7 +110,7 @@ let rowId = 0;
     deleteRowLabel: n => `ลบงวดที่ ${n}`
   });
   Object.assign(translations.en, {
-    clientContact: 'Customer address / Contact', paymentDueDate: 'Payment due date',
+    referenceNumber: 'Quotation / contract reference', clientTax: 'Customer tax ID / branch', includeRow: 'Bill', noItems: 'Select and enter at least one item', clientContact: 'Customer address / Contact', paymentDueDate: 'Payment due date',
     incompleteTitle: 'Review before printing',
     incompleteIntro: 'The following information is missing. You can edit it or continue printing.',
     backToEdit: 'Back to edit', printAnyway: 'Print anyway', missingAmounts: 'Amounts for entered items',
@@ -354,11 +354,13 @@ let rowId = 0;
       const missing = [];
       const visible = input => !input.closest('.mode-hidden');
       const t = translations[currentLang];
-      for (const [id,label] of [['companyName',t.biller],['client-name',t.client],['document-number',t.documentNumber]]) {
+      for (const [id,label] of [['companyName',t.biller],['client-name',t.client],['document-number',t.documentNumber],['issue-date',t.issueDate],['payment-due-date',t.paymentDueDate],['payment-method',t.paymentMethod]]) {
         const input = document.getElementById(id);
         if (visible(input) && !input.value.trim()) missing.push({ label, input });
       }
-      document.querySelectorAll('.item-row').forEach(row => {
+      const selected = Array.from(document.querySelectorAll('.item-row'));
+      if (!selected.some(row => row.querySelector('.amt-input').value.trim())) missing.push({label:t.noItems,input:document.querySelector('.amt-input')});
+      selected.forEach(row => {
         const amount = row.querySelector('.amt-input');
         const filled = row.querySelector('.row-description').value.trim() || row.querySelector('.pct-input').value.trim();
         if (filled && !amount.value.trim()) missing.push({label:`${t.amount} — ${t.installment} ${row.dataset.rowId}`,input:amount});

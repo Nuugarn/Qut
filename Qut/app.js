@@ -6,8 +6,8 @@ const translations = {
       reset: 'ล้างข้อมูล', exportPdf: 'Export PDF', customer: 'ลูกค้า', quotationNo: 'เลขที่', date: 'วันที่',
       validUntil: 'ราคายืนถึง', issuedBy: 'ผู้ออก', reference: 'อ้างอิง', itemNo: 'ลำดับ',
       description: 'รายการ / รายละเอียด', quantity: 'จำนวน', unit: 'หน่วย', unitPrice: 'ราคา/หน่วย', amount: 'ราคารวม',
-      addItem: '+ เพิ่มรายการ', notes: 'หมายเหตุ', subtotal: 'รวมราคาสินค้า/บริการ',
-      extraCost: 'ค่าขนส่ง/ค่าใช้จ่ายเพิ่มเติม', vat: 'รวม VAT 7%', grandTotal: 'ยอดรวมทั้งสิ้น',
+      addItem: 'เพิ่มรายการ', notes: 'หมายเหตุ', subtotal: 'จำนวนเงินรวม',
+      extraCost: 'ค่าขนส่ง/ค่าใช้จ่ายเพิ่มเติม', vat: 'รวม VAT 7%', grandTotal: 'ยอดเงินสุทธิ',
       whtShort: 'หัก ณ ที่จ่าย', whtEstimate: 'ประมาณการหัก ณ ที่จ่าย', netPayment: 'ประมาณการยอดชำระสุทธิ',
       approvalSignatures: 'ลายเซ็นผู้อนุมัติ', seller: 'ผู้เสนอราคา', buyer: 'ผู้อนุมัติ / ลูกค้า',
       companyPlaceholder: 'ชื่อบริษัท / ที่อยู่ (ผู้ออกใบเสนอราคา)', customerPlaceholder: 'กรอกชื่อลูกค้าหรือบริษัท',
@@ -28,7 +28,7 @@ const translations = {
       reset: 'Reset', exportPdf: 'Export PDF', customer: 'Customer', quotationNo: 'Quotation No.', date: 'Date',
       validUntil: 'Valid Until', issuedBy: 'Issued By', reference: 'Reference', itemNo: 'Item',
       description: 'Description', quantity: 'Qty', unit: 'Unit', unitPrice: 'Unit Price', amount: 'Amount',
-      addItem: '+ Add Item', notes: 'Notes', subtotal: 'Subtotal', extraCost: 'Shipping / Additional Costs',
+      addItem: 'Add Item', notes: 'Notes', subtotal: 'Subtotal', extraCost: 'Shipping / Additional Costs',
       vat: 'VAT 7%', grandTotal: 'Grand Total', whtShort: 'Withholding Tax',
       whtEstimate: 'Estimated Withholding Tax', netPayment: 'Estimated Net Payment',
       approvalSignatures: 'APPROVAL SIGNATURES', seller: 'Prepared By', buyer: 'Approved By / Customer',
@@ -350,7 +350,7 @@ const translations = {
       if (amount === null) invalid = true; else subtotal += amount;
     });
     const extra = document.getElementById('extraCost'), discount = document.getElementById('discountValue'), rate = document.getElementById('whtRate');
-    const extraOn = document.getElementById('showExtraCost').checked;
+    const extraOn = true;
     const discountOn = document.getElementById('discountEnabled').checked;
     const discountMode = document.getElementById('discountMode').value;
     const whtOn = document.getElementById('showWht').checked && document.getElementById('whtToggle').checked;
@@ -421,7 +421,7 @@ const translations = {
   });
 
   function applySummaryVisibility() {
-    [['showSubTotal','rowSubTotal'],['showExtraCost','rowExtraCost'],['showWht','rowWht'],['discountEnabled','rowDiscount']].forEach(([c,r]) => {
+    [['showSubTotal','rowSubTotal'],['showWht','rowWht'],['discountEnabled','rowDiscount']].forEach(([c,r]) => {
       document.getElementById(r).style.display = document.getElementById(c).checked ? '' : 'none';
     });
     const mode = document.getElementById('vatMode').value;
@@ -436,7 +436,7 @@ const translations = {
   function gatherData() {
     const fields = Object.fromEntries(fieldIds.map(id => [id, document.getElementById(id).value]));
     const flags = Object.fromEntries(flagIds.map(id => [id, document.getElementById(id).checked]));
-    const rows = Array.from(document.querySelectorAll('.item-row'), row => Object.fromEntries(['item-num-input','item-name','item-detail','qty-input','unit-input','price-input'].map(cls => [cls, row.querySelector('.'+cls).value])));
+    const rows = Array.from(document.querySelectorAll('.item-row'), row => ({...Object.fromEntries(['item-num-input','item-name','item-detail','qty-input','unit-input','price-input'].map(cls => [cls, row.querySelector('.'+cls).value])), colors:Array.from(row.cells, cell => cell.style.backgroundColor)}));
     return {language:currentLanguage, fields, flags, rows};
   }
   function saveData() { if (!restoring) Workspace.saveDraft('qut', gatherData()); }
@@ -449,6 +449,7 @@ const translations = {
       d.rows.forEach(data => {
         addRow(); const row = document.getElementById('row-'+rowCount);
         ['item-num-input','item-name','item-detail','qty-input','unit-input','price-input'].forEach(cls => { if (typeof data[cls] === 'string') row.querySelector('.'+cls).value = data[cls]; });
+        if (Array.isArray(data.colors)) data.colors.forEach((color, i) => { if (row.cells[i] && color) row.cells[i].style.backgroundColor = color; });
         formatPriceDisplay(rowCount);
       });
       applyLanguage(d.language === 'en' ? 'en' : 'th', false);
@@ -483,6 +484,19 @@ const translations = {
     setTimeout(() => t.classList.remove('show'), 2800);
   }
 
+  const paintToggle = document.getElementById('paint-toggle');
+  let painting = false;
+  paintToggle.addEventListener('click', () => { painting = !painting; paintToggle.setAttribute('aria-pressed', String(painting)); document.getElementById('paint-help').textContent = painting ? 'คลิกช่องในตารางเพื่อระบายสี แล้วกดปุ่มอีกครั้งเมื่อเสร็จ' : 'เลือกสีและขอบเขต แล้วกดระบายสี'; });
+  document.getElementById('itemsBody').addEventListener('click', event => {
+    if (!painting) return;
+    const cell = event.target.closest('td'); if (!cell) return;
+    event.preventDefault(); event.stopPropagation();
+    const scope = document.getElementById('paint-scope').value;
+    const cells = scope === 'row' ? Array.from(cell.parentElement.cells) : scope === 'column' ? Array.from(document.querySelectorAll('#itemsBody tr')).map(row => row.cells[cell.cellIndex]) : [cell];
+    cells.filter(Boolean).forEach(node => node.style.backgroundColor = document.getElementById('paint-color').value);
+    saveData();
+  }, true);
+  document.getElementById('paint-clear').addEventListener('click', () => { document.querySelectorAll('#itemsBody td').forEach(cell => cell.style.backgroundColor = ''); saveData(); });
   applyLanguage('th', false);
   loadData();
   applySummaryVisibility();
