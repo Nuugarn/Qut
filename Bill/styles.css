@@ -86,7 +86,7 @@ textarea { resize: vertical; }
 [aria-invalid="true"] { border-color: var(--danger) !important; background: #fff5f3 !important; }
 .footer-top-row { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 20px; margin-top: 4px; }
 .footer-top-left { color: var(--text); }
-.footer-top-left h3 { font-size: 15px; font-weight: 700; }
+.footer-top-left h3 { color: #c62828; font-size: 12px; font-weight: 700; }
 .footer-top-left-icon { display: none; }
 .footer-top-right { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; padding: 16px 18px; background: #edf3ef; border-radius: 7px; color: var(--primary); }
 .footer-top-right-label { font-size: 13px; font-weight: 600; }

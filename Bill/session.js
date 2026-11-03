@@ -3,7 +3,7 @@
   let restoring = true;
   const fields = ['companyName','companyContact','document-number','issue-date','project-name','client-name',
     'payment-method','payment-terms','additional-notes','biller-name','approver-name','sigBillerDate','sigApproverDate',
-    'client-contact','payment-due-date'];
+    'client-contact','payment-due-date','reference-number','client-tax'];
   function save() {
     if (restoring) return;
     Workspace.saveDraft('bill', {
