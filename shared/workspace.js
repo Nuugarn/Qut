@@ -1,9 +1,27 @@
 (function () {
   'use strict';
   const company = {
-    th: { name: 'ช่างเกล้า Built-in', contact: '101/158 ซ.55 ถนนเลียบวารี แขวงโคกแฝก เขตหนองจอก กรุงเทพฯ 10530\nโทร.091-876-8157' },
-    en: { name: 'Chang Klao Built-in', contact: '101/158 Soi 55, Liap Wari Road, Khok Faet, Nong Chok, Bangkok 10530\nTel. 091-876-8157' }
+    th: { name: 'ช่างเกล้า Built-in', contact: '101/138 ซ.55 ถนนเลียบวารี แขวงโคกแฝก เขตหนองจอก กรุงเทพฯ 10530\nโทร.091-876-8157' },
+    en: { name: 'Chang Klao Built-in', contact: '101/138 Soi 55, Liap Wari Road, Khok Faet, Nong Chok, Bangkok 10530\nTel. 091-876-8157' }
   };
+  function refreshCompanyAddress(value, includesName = false) {
+    for (const preset of Object.values(company)) {
+      const current = includesName ? preset.name + '\n' + preset.contact : preset.contact;
+      if (value === current.replace('101/138', '101/158')) return current;
+    }
+    return value;
+  }
+
+  function printWithName(label, sourceId) {
+    const number = document.getElementById(sourceId).value.trim();
+    const serial = number.match(/^(?:QT|BL)-\d{4}-(\d{1,4})$/i)?.[1] || number;
+    const safeSerial = serial.replace(/[<>:"/\\|?*]/g, '-');
+    const previousTitle = document.title;
+    document.title = safeSerial ? label + ' (' + safeSerial + ')' : label;
+    window.addEventListener('afterprint', () => { document.title = previousTitle; }, { once: true });
+    window.print();
+  }
+
   let storageFailed = false;
   function notice() {
     if (!storageFailed) return;
@@ -66,5 +84,5 @@
     });
     new MutationObserver(updateNav).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
   });
-  window.Workspace = { company, readDraft, saveDraft, clearDraft, preparePrint, clearPrint };
+  window.Workspace = { company, refreshCompanyAddress, printWithName, readDraft, saveDraft, clearDraft, preparePrint, clearPrint };
 })();

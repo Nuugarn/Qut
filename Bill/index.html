@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="../shared/workspace.css">
 <link rel="stylesheet" href="../shared/header.css">
 <link rel="stylesheet" href="../shared/document-modes.css">
+<link rel="stylesheet" href="../shared/row-order.css">
 <script src="../shared/workspace.js"></script>
 </head>
 <body data-section="bill">
@@ -28,11 +29,12 @@
         <h4 data-i18n="companyMenuTitle">ข้อมูลผู้วางบิล</h4>
         <button type="button" class="company-preset" onclick="applyCompanyPreset()" data-i18n-html="companyPreset">
           ช่างเกล้า Built-in<br>
-          101/158 ซ.55 ถนนเลียบวารี แขวงโคกแฝก เขตหนองจอก กรุงเทพฯ 10530<br>
+          101/138 ซ.55 ถนนเลียบวารี แขวงโคกแฝก เขตหนองจอก กรุงเทพฯ 10530<br>
           โทร.091-876-8157
         </button>
       </div>
     </div>
+    <button class="summary-settings-btn no-print" id="split-installments" type="button" aria-haspopup="dialog" data-i18n="splitInstallments">แบ่งงวด</button>
     <button class="btn-pdf" type="button" onclick="printDocument()">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
       <span data-i18n="savePdf">บันทึก PDF</span>
@@ -185,9 +187,29 @@
   </div>
 </main>
 
+<dialog id="installment-planner" class="no-print" aria-labelledby="installment-planner-title">
+  <form novalidate>
+    <h2 id="installment-planner-title" data-i18n="splitInstallments">แบ่งงวด</h2>
+    <div class="planner-fields">
+      <label for="planner-total"><span data-i18n="plannerTotal">ยอดรวม (บาท)</span>
+        <input id="planner-total" type="text" inputmode="decimal" placeholder="0.00" autofocus></label>
+      <label for="planner-count"><span data-i18n="plannerCount">จำนวนงวด</span>
+        <input id="planner-count" type="number" min="1" max="100" step="1" inputmode="numeric"></label>
+    </div>
+    <div id="planner-rates"></div>
+    <p id="planner-status" role="status"></p>
+    <div class="planner-actions">
+      <button type="button" id="planner-cancel" data-i18n="plannerCancel">ยกเลิก</button>
+      <button type="submit" data-i18n="plannerApply">ใช้กับตาราง</button>
+    </div>
+  </form>
+</dialog>
 <script src="../shared/amount-words.js"></script>
+<script src="../shared/money.js"></script>
+<script src="../shared/row-order.js"></script>
 <script src="./app.js"></script>
 <script src="./session.js"></script>
+<script src="./installments.js"></script>
 <script src="../shared/quote-number.js"></script>
 <script src="../shared/document-modes.js"></script>
 </body>

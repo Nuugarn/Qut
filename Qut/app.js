@@ -19,7 +19,7 @@ const translations = {
       sellerDateAria: 'เลือกวันที่ผู้เสนอราคา', clearSellerDateAria: 'ล้างวันที่ผู้เสนอราคา',
       buyerDateAria: 'เลือกวันที่ผู้อนุมัติหรือลูกค้า', clearBuyerDateAria: 'ล้างวันที่ผู้อนุมัติหรือลูกค้า',
       confirmReset: 'ล้างข้อมูลทั้งหมดใช่ไหม?', resetDone: 'ล้างข้อมูลแล้ว ✓', presetDone: 'ใส่ข้อมูลผู้เสนอราคาแล้ว ✓',
-      companyPresetHtml: 'ช่างเกล้า Built-in<br>101/158 ซ.55 ถนนเลียบวารี แขวงโคกแฝก เขตหนองจอก กรุงเทพฯ 10530<br>โทร.091-876-8157'
+      companyPresetHtml: 'ช่างเกล้า Built-in<br>101/138 ซ.55 ถนนเลียบวารี แขวงโคกแฝก เขตหนองจอก กรุงเทพฯ 10530<br>โทร.091-876-8157'
     },
     en: {
       pageTitle: 'Quotation', topbarTitle: '📄 Quo<span>tation</span>', quotation: 'QUOTATION',
@@ -41,7 +41,7 @@ const translations = {
       sellerDateAria: 'Select preparer date', clearSellerDateAria: 'Clear preparer date',
       buyerDateAria: 'Select approval date', clearBuyerDateAria: 'Clear approval date',
       confirmReset: 'Reset all information?', resetDone: 'Information reset ✓', presetDone: 'Company details added ✓',
-      companyPresetHtml: 'Chang Klao Built-in<br>101/158 Soi 55, Liap Wari Road, Khok Faet, Nong Chok, Bangkok 10530<br>Tel. 091-876-8157'
+      companyPresetHtml: 'Chang Klao Built-in<br>101/138 Soi 55, Liap Wari Road, Khok Faet, Nong Chok, Bangkok 10530<br>Tel. 091-876-8157'
     }
   };
 
@@ -241,9 +241,8 @@ const translations = {
         remove.title = t('deleteItem');
         remove.setAttribute('aria-label', t('deleteItem'));
       }
-      const price = row.querySelector('.price-input');
-      const priceDisplay = row.querySelector('.price-display');
-      if (price && priceDisplay) priceDisplay.textContent = Number(parsePriceInput(price)).toLocaleString(currentLanguage === 'th' ? 'th-TH' : 'en-US');
+      RowOrder.label(row, currentLanguage);
+      formatPriceDisplay(row.id.slice(4));
     });
 
     ['docDate','dueDate','sigSellerDate','sigBuyerDate'].forEach(inputId => updateDateControl(inputId, inputId + 'Display'));
@@ -283,26 +282,24 @@ const translations = {
     row.querySelector('.price-display').style.display = 'block';
   }
 
-  function parsePriceInput(el) {
-    return parseFloat((el?.value || '').replace(/,/g, '').replace(/[^0-9.]/g, '')) || 0;
-  }
-
   function autoResize(el) {
     el.style.height = 'auto';
     el.style.height = el.scrollHeight + 'px';
   }
 
   function addRow() {
-    rowCount++;
-    const id = rowCount;
     const body = document.getElementById('itemsBody');
+    const numbers = new Set(Array.from(body.querySelectorAll('.item-num-input'), input => input.value));
+    do { rowCount++; } while (numbers.has(String(rowCount)));
+    const id = rowCount;
     const row = document.createElement('tr');
     row.className = 'item-row';
     row.id = 'row-' + id;
     row.innerHTML = `
       <td class="td-num" style="position:relative;">
         <input class="item-num-input" type="text" value="${id}" oninput="saveData()">
-        <button class="btn-del no-print" onclick="delRow(${id})" title="${t('deleteItem')}" aria-label="${t('deleteItem')}"
+        <button type="button" class="btn-move-row no-print" aria-label="ย้ายรายการ" title="ย้ายรายการ">↕</button>
+        <button class="btn-del no-print" type="button" onclick="RowOrder.confirmDelete(this, () => delRow(${id}))" title="${t('deleteItem')}" aria-label="${t('deleteItem')}"
           style="position:absolute;top:2px;right:2px;width:16px;height:16px;padding:0;display:flex;align-items:center;justify-content:center;">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -327,6 +324,7 @@ const translations = {
       </td>
       <td class="td-num-val"><input class="item-total item-input" id="rt-${id}" type="text" value="0.00" readonly aria-label="${t('amount')}"></td>
     `;
+    RowOrder.label(row, currentLanguage);
     body.appendChild(row);
     ['item-name','item-detail','qty-input','unit-input','price-input'].forEach((cls, i) => row.querySelector('.'+cls).setAttribute('aria-label', t(['itemNamePlaceholder','itemDetailPlaceholder','quantity','unit','unitPrice'][i])));
     calcTotal();
@@ -445,6 +443,8 @@ const translations = {
     const d = Workspace.readDraft('qut');
     if (d && d.fields && d.flags && Array.isArray(d.rows)) {
       fieldIds.forEach(id => { if (typeof d.fields[id] === 'string') document.getElementById(id).value = d.fields[id]; });
+      const companyNote = document.getElementById('companyNote');
+      companyNote.value = Workspace.refreshCompanyAddress(companyNote.value, true);
       flagIds.forEach(id => { if (typeof d.flags[id] === 'boolean') document.getElementById(id).checked = d.flags[id]; });
       d.rows.forEach(data => {
         addRow(); const row = document.getElementById('row-'+rowCount);
@@ -473,7 +473,7 @@ const translations = {
       if (invalid?.classList.contains('price-input')) showPriceInput(invalid.closest('.item-row').id.slice(4));
       (invalid || document.getElementById('validation-message')).focus(); invalid?.reportValidity(); return false;
     }
-    saveData(); window.print(); return true;
+    saveData(); Workspace.printWithName('รายการเสนอราคา', 'docNo'); return true;
   }
   window.addEventListener('beforeprint', () => { calcTotal(); syncCompanyNoteDisplay(); Workspace.preparePrint(document.getElementById('form-area')); });
   window.addEventListener('afterprint', () => Workspace.clearPrint(document.getElementById('form-area')));
@@ -484,11 +484,13 @@ const translations = {
     setTimeout(() => t.classList.remove('show'), 2800);
   }
 
+  RowOrder.attach(document.getElementById('itemsBody'), () => currentLanguage, saveData);
+
   const paintToggle = document.getElementById('paint-toggle');
   let painting = false;
   paintToggle.addEventListener('click', () => { painting = !painting; paintToggle.setAttribute('aria-pressed', String(painting)); document.getElementById('paint-help').textContent = painting ? 'คลิกช่องในตารางเพื่อระบายสี แล้วกดปุ่มอีกครั้งเมื่อเสร็จ' : 'เลือกสีและขอบเขต แล้วกดระบายสี'; });
   document.getElementById('itemsBody').addEventListener('click', event => {
-    if (!painting) return;
+    if (!painting || event.target.closest('.btn-move-row, .btn-del')) return;
     const cell = event.target.closest('td'); if (!cell) return;
     event.preventDefault(); event.stopPropagation();
     const scope = document.getElementById('paint-scope').value;

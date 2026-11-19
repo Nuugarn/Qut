@@ -11,7 +11,7 @@ let rowId = 0;
       companyButton: 'ข้อมูล',
       companySettingsTitle: 'เลือกข้อมูลผู้วางบิล',
       companyMenuTitle: 'ข้อมูลผู้วางบิล',
-      companyPreset: 'ช่างเกล้า Built-in<br>101/158 ซ.55 ถนนเลียบวารี แขวงโคกแฝก เขตหนองจอก กรุงเทพฯ 10530<br>โทร.091-876-8157',
+      companyPreset: 'ช่างเกล้า Built-in<br>101/138 ซ.55 ถนนเลียบวารี แขวงโคกแฝก เขตหนองจอก กรุงเทพฯ 10530<br>โทร.091-876-8157',
       companyNamePlaceholder: 'ชื่อบริษัท / ผู้รับเหมา',
       companyContactPlaceholder: 'ที่อยู่ / เบอร์โทร / อีเมล',
       documentTitle: 'ใบวางบิล',
@@ -55,7 +55,7 @@ let rowId = 0;
       companyButton: 'Company',
       companySettingsTitle: 'Select biller information',
       companyMenuTitle: 'Biller Information',
-      companyPreset: 'Chang Klao Built-in<br>101/158 Soi 55, Liap Wari Road, Khok Faet, Nong Chok, Bangkok 10530<br>Tel. 091-876-8157',
+      companyPreset: 'Chang Klao Built-in<br>101/138 Soi 55, Liap Wari Road, Khok Faet, Nong Chok, Bangkok 10530<br>Tel. 091-876-8157',
       companyNamePlaceholder: 'Company / Contractor name',
       companyContactPlaceholder: 'Address / Phone / Email',
       documentTitle: 'BILLING STATEMENT',
@@ -107,7 +107,15 @@ let rowId = 0;
     amountError: 'กรอกจำนวนเงินตั้งแต่ 0 ถึง 9,999,999,999.99 โดยใช้ทศนิยมไม่เกิน 2 ตำแหน่ง',
     totalError: 'ยอดรวมต้องไม่เกิน 9,999,999,999.99 บาท', validationError: 'โปรดแก้ไขจำนวนเงินที่ไม่ถูกต้องก่อนพิมพ์',
     invalidTotal: 'ตรวจสอบจำนวนเงิน', actions: 'จัดการ', rowLabel: (label, n) => `${label} งวดที่ ${n}`,
-    deleteRowLabel: n => `ลบงวดที่ ${n}`
+    deleteRowLabel: n => `ลบงวดที่ ${n}`,
+    splitInstallments: 'แบ่งงวด', plannerTotal: 'ยอดรวม (บาท)', plannerCount: 'จำนวนงวด',
+    plannerCancel: 'ยกเลิก', plannerApply: 'ใช้กับตาราง',
+    plannerRate: n => `งวดที่ ${n} (%)`,
+    plannerRateTotal: n => `รวม ${n}% จาก 100%`,
+    plannerInvalidTotal: 'กรอกยอดรวมมากกว่า 0 บาท ทศนิยมไม่เกิน 2 ตำแหน่ง',
+    plannerInvalidCount: 'กรอกจำนวนงวดตั้งแต่ 1 ถึง 100',
+    plannerInvalidRate: 'กรอกเปอร์เซ็นต์แต่ละงวดมากกว่า 0 และไม่เกิน 100 ทศนิยมไม่เกิน 2 ตำแหน่ง',
+    plannerConfirm: 'นำเปอร์เซ็นต์และยอดเงินใหม่ไปใส่ในตาราง และลบงวดที่เกินจากจำนวนที่เลือกหรือไม่?'
   });
   Object.assign(translations.en, {
     referenceNumber: 'Quotation / contract reference', clientTax: 'Customer tax ID / branch', includeRow: 'Bill', noItems: 'Select and enter at least one item', clientContact: 'Customer address / Contact', paymentDueDate: 'Payment due date',
@@ -122,7 +130,15 @@ let rowId = 0;
     amountError: 'Enter an amount from 0 to 9,999,999,999.99 with no more than 2 decimal places.',
     totalError: 'The total must not exceed THB 9,999,999,999.99.', validationError: 'Correct the invalid amounts before printing.',
     invalidTotal: 'Check amounts', actions: 'Actions', rowLabel: (label, n) => `${label}, installment ${n}`,
-    deleteRowLabel: n => `Delete installment ${n}`
+    deleteRowLabel: n => `Delete installment ${n}`,
+    splitInstallments: 'Split payments', plannerTotal: 'Total (THB)', plannerCount: 'Installments',
+    plannerCancel: 'Cancel', plannerApply: 'Apply to table',
+    plannerRate: n => `Installment ${n} (%)`,
+    plannerRateTotal: n => `Total ${n}% of 100%`,
+    plannerInvalidTotal: 'Enter a total greater than zero with up to 2 decimal places.',
+    plannerInvalidCount: 'Enter between 1 and 100 installments.',
+    plannerInvalidRate: 'Enter a percentage above 0 and at most 100 for each installment, with up to 2 decimal places.',
+    plannerConfirm: 'Apply the new percentages and amounts, and remove any rows beyond the selected count?'
   });
 
   function setText(id, value) {
@@ -142,7 +158,10 @@ let rowId = 0;
   }
 
   function updateSigDate(inputId, dispId) {
-    setText(dispId, formatDate(document.getElementById(inputId)?.value || ''));
+    const input = document.getElementById(inputId);
+    const value = input?.value || '';
+    setText(dispId, formatDate(value));
+    if (input?.classList.contains('sig-date-pk')) input.classList.toggle('is-empty', !value);
   }
 
   function fmt(n) {
@@ -185,10 +204,9 @@ let rowId = 0;
     const name = document.getElementById('companyName');
     const contact = document.getElementById('companyContact');
     if (!name || !contact) return;
-    name.value = currentLang === 'th' ? 'ช่างเกล้า Built-in' : 'Chang Klao Built-in';
-    contact.value = currentLang === 'th'
-      ? '101/158 ซ.55 ถนนเลียบวารี แขวงโคกแฝก เขตหนองจอก กรุงเทพฯ 10530\nโทร.091-876-8157'
-      : '101/158 Soi 55, Liap Wari Road, Khok Faet, Nong Chok, Bangkok 10530\nTel. 091-876-8157';
+    const preset = Workspace.company[currentLang];
+    name.value = preset.name;
+    contact.value = preset.contact;
     resizeCompanyContact();
     setCompanyWidget(false, true);
   }
@@ -222,6 +240,7 @@ let rowId = 0;
       description.setAttribute('aria-label', t.rowLabel(t.description, n));
       row.querySelector('.pct-input').setAttribute('aria-label', t.rowLabel(t.percentage, n));
       row.querySelector('.amt-input').setAttribute('aria-label', t.rowLabel(t.amount, n));
+      RowOrder.label(row, currentLang, n);
       const button = row.querySelector('.btn-del');
       button.title = t.deleteRowLabel(n);
       button.setAttribute('aria-label', t.deleteRowLabel(n));
@@ -264,8 +283,9 @@ let rowId = 0;
   });
   window.addEventListener('resize', () => document.querySelectorAll('textarea').forEach(resizeTextarea));
 
-  function addRow(desc = '', pct = '', amt = '', focusRow = true) {
-    const id = ++rowId;
+  function addRow(desc = '', pct = '', amt = '', focusRow = true, installment = rowId + 1) {
+    const id = installment;
+    rowId = Math.max(rowId, id);
     const row = document.createElement('tr');
     row.className = 'item-row'; row.id = `row-${id}`; row.dataset.rowId = id;
     // Static skeleton; all user-provided content is assigned through .value below.
@@ -274,7 +294,7 @@ let rowId = 0;
       <td class="description-cell"><textarea class="ii row-description" rows="1"></textarea></td>
       <td><input class="ii right pct-input" type="text" inputmode="decimal" placeholder="—"></td>
       <td><input class="ii right amt-input" type="text" inputmode="decimal" placeholder="0.00" aria-describedby="amount-hint validation-message"></td>
-      <td class="no-print"><button class="btn-del" type="button"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M5 6l1 14h12l1-14M9 6V3h6v3M10 10v6M14 10v6"/></svg></button></td>`;
+      <td class="no-print"><div class="row-actions"><button type="button" class="btn-move-row no-print" aria-label="ย้ายรายการ" title="ย้ายรายการ">↕</button><button class="btn-del" type="button"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M5 6l1 14h12l1-14M9 6V3h6v3M10 10v6M14 10v6"/></svg></button></div></td>`;
     const description = row.querySelector('.row-description');
     description.value = desc;
     row.querySelector('.pct-input').value = pct;
@@ -284,7 +304,9 @@ let rowId = 0;
     row.querySelector('.amt-input').addEventListener('input', calcAll);
     row.querySelector('.amt-input').addEventListener('focus', event => { event.target.value = amountValue(event.target.value); event.target.select(); });
     row.querySelector('.amt-input').addEventListener('blur', () => { calcAll(); window.saveBillDraft?.(); });
-    row.querySelector('.btn-del').addEventListener('click', () => delRow(id));
+    row.querySelector('.btn-del').addEventListener('click', event => {
+      RowOrder.confirmDelete(event.currentTarget, () => delRow(id));
+    });
     document.getElementById('tbl-body').appendChild(row);
     updateRowLabels(); calcAll(); resizeTextarea(description);
     if (focusRow) description.focus();
@@ -309,6 +331,8 @@ let rowId = 0;
     }
     return cents;
   }
+
+  RowOrder.attach(document.getElementById('tbl-body'), () => currentLang, () => window.saveBillDraft?.());
 
   function delRow(id) {
     const row = document.getElementById(`row-${id}`);
@@ -367,7 +391,7 @@ let rowId = 0;
       });
       if (missing.length) { showPrintWarning(missing); return false; }
     }
-    window.print();
+    Workspace.printWithName('รายการชำระตามงวด', 'document-number');
     return true;
   }
 
@@ -394,8 +418,21 @@ let rowId = 0;
 
   function preparePrintMirrors() {
     clearPrintMirrors(); calcAll();
+    const signatureSection = document.querySelector('.footer-bottom-right');
+    let hasSignature = false;
+    signatureSection.querySelectorAll('.sig-col').forEach(column => {
+      const name = column.querySelector('.sig-name-n');
+      const date = column.querySelector('.sig-date-pk');
+      updateSigDate(date.id, column.querySelector('.sig-date-disp').id);
+      const hasName = Boolean(name.value.trim());
+      const hasDate = Boolean(date.value);
+      name.classList.toggle('is-empty', !hasName);
+      column.classList.toggle('is-empty', !hasName && !hasDate);
+      hasSignature ||= hasName || hasDate;
+    });
+    signatureSection.classList.toggle('is-empty', !hasSignature);
     document.querySelectorAll('.wrapper input, .wrapper textarea').forEach(input => {
-      if (input.closest('.no-print') || input.classList.contains('sig-date-pk') || input.id === 'issue-date') return;
+      if (input.closest('.no-print') || input.matches('.sig-date-pk, .sig-name-n.is-empty, #issue-date')) return;
       const mirror = document.createElement('span');
       mirror.className = 'print-value';
       if (input.classList.contains('right')) mirror.classList.add('right');
