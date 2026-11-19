@@ -10,6 +10,7 @@
       language:currentLang,
       fields:Object.fromEntries(fields.map(id => [id,document.getElementById(id).value])),
       rows:Array.from(document.querySelectorAll('.item-row'),row => ({
+        installment:Number(row.dataset.rowId),
         description:row.querySelector('.row-description').value,
         percentage:row.querySelector('.pct-input').value,
         amount:amountValue(row.querySelector('.amt-input').value)
@@ -24,10 +25,13 @@
   const draft = Workspace.readDraft('bill');
   if (draft && draft.fields && Array.isArray(draft.rows)) {
     fields.forEach(id => { if (typeof draft.fields[id] === 'string') document.getElementById(id).value = draft.fields[id]; });
+    const contact = document.getElementById('companyContact');
+    contact.value = Workspace.refreshCompanyAddress(contact.value);
     document.getElementById('tbl-body').replaceChildren(); rowId = 0;
     // Also accepts the previous combined version's draft: keep its displayed %
     // and amount as independent inputs, without recalculating saved amounts.
-    draft.rows.forEach(row => addRow(row.description || '',row.percentage || '',row.amount || '',false));
+    draft.rows.forEach(row => addRow(row.description || '', row.percentage || '', row.amount || '', false,
+      Number.isSafeInteger(row.installment) && row.installment > 0 ? row.installment : undefined));
     setLanguage(draft.language === 'en' ? 'en' : 'th');
   }
   restoring = false;

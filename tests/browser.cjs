@@ -16,9 +16,148 @@ fs.mkdirSync(out, { recursive: true });
   const check = (condition, label) => { assert.ok(condition, label); checks.push(label); };
   const value = selector => p.locator(selector).inputValue();
   const content = selector => p.locator(selector).textContent();
-  async function switchSection(section) { await p.locator('.section-toggle').click(); await p.locator('#nav-'+section).click(); }
+  async function switchSection(section) {
+    await p.locator('.section-toggle').click();
+    await p.locator('#nav-' + section).click();
+    await p.waitForURL(section === 'qut' ? '**/Qut/index.html' : '**/Bill/index.html', { waitUntil: 'domcontentloaded' });
+  }
   async function pdf(name) { await p.evaluate(() => document.fonts.ready); await p.pdf({path:path.join(out,name+'.pdf'),format:'A4',printBackground:true,preferCSSPageSize:true}); }
   try {
+    for (const [section, field, title, address] of [
+      ['Qut', '.item-name', 'รายการเสนอราคา', '#companyNote'],
+      ['Bill', '.row-description', 'รายการชำระตามงวด', '#companyContact']
+    ]) {
+      await p.goto(base + '/' + section + '/');
+      if (section === 'Bill') {
+        await p.locator('#company-menu-button').click();
+        await p.locator('.company-preset').click();
+      }
+      check((await value(address)).includes('101/138'), section + ' uses the new preset address');
+      await p.locator(field).last().fill('DRAG-TEST');
+      await p.locator('.btn-move-row').last().scrollIntoViewIfNeeded();
+      const handle = await p.locator('.btn-move-row').last().boundingBox();
+      const top = await p.locator('.item-row').first().boundingBox();
+      await p.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
+      await p.mouse.down();
+      await p.mouse.move(handle.x + handle.width / 2, top.y + top.height / 3, { steps: 12 });
+      check(await p.locator('.is-dragging-row').count() === 1, section + ' picks up the row while pressed');
+      await p.mouse.up();
+      check(await value(field + ' >> nth=0') === 'DRAG-TEST', section + ' drops the row at the destination');
+      await p.reload();
+      check(await value(field + ' >> nth=0') === 'DRAG-TEST', section + ' restores the dragged order');
+      await p.locator('.number-serial').fill('0254');
+      const originalTitle = await p.title();
+      await p.evaluate(() => {
+        window.print = () => {
+          window.printName = document.title;
+          window.dispatchEvent(new Event('afterprint'));
+        };
+      });
+      await p.locator(section === 'Qut' ? '#pdfBtn' : '.btn-pdf').click();
+      if (section === 'Bill') await p.locator('#print-warning button').last().click();
+      check(await p.evaluate(() => window.printName) === title + ' (0254)', section + ' suggests the requested PDF filename');
+      check(await p.title() === originalTitle, section + ' restores its tab title after printing');
+      const remove = p.locator('.btn-del').first();
+      await remove.click();
+      check(await p.locator('.item-row').count() === 3 && await remove.getAttribute('aria-pressed') === 'true',
+        section + ' only arms deletion on first click');
+      await remove.click();
+      check(await p.locator('.item-row').count() === 2, section + ' deletes on the second click');
+      await p.evaluate(() => sessionStorage.clear());
+    }
+    await p.goto(base + '/Bill/');
+    const signatureSection = p.locator('.footer-bottom-right');
+    const signatureDate = p.locator('#sigApproverDate');
+    check(await signatureDate.evaluate(input => getComputedStyle(input).color === 'rgb(120, 135, 128)'),
+      'empty signature date uses muted text');
+    await signatureDate.fill('2026-11-19');
+    check(await signatureDate.evaluate(input => !input.classList.contains('is-empty')),
+      'filled signature date uses normal text');
+    await p.emulateMedia({ media: 'print' });
+    const preparePrint = () => p.evaluate(() => window.dispatchEvent(new Event('beforeprint')));
+    await preparePrint();
+    check(!await p.locator('.sig-col').first().isVisible() && await p.locator('.sig-col').last().isVisible(),
+      'printing a date-only signature hides the unused signer');
+    check(!await p.locator('#approver-name').isVisible() && (await content('#sigApproverDisp')).trim(),
+      'printing a date-only signature shows the date without an empty name');
+    await p.emulateMedia({ media: 'screen' });
+    await signatureDate.fill('');
+    await p.locator('#biller-name').fill('SIGNER NAME ONLY');
+    await p.emulateMedia({ media: 'print' });
+    await preparePrint();
+    check(await p.locator('#biller-name + .print-value').textContent() === 'SIGNER NAME ONLY'
+      && !await p.locator('.sig-date-lbl').first().isVisible(), 'printing a name-only signature hides the empty date');
+    await p.emulateMedia({ media: 'screen' });
+    await p.locator('#biller-name').fill(' ');
+    await p.emulateMedia({ media: 'print' });
+    await preparePrint();
+    check(!await signatureSection.isVisible(), 'printing with both signatures empty hides the signature section');
+    await pdf('bill-no-signatures');
+    await p.emulateMedia({ media: 'screen' });
+    check(await signatureSection.isVisible(), 'signature fields stay available on screen');
+    await p.evaluate(() => sessionStorage.clear());
+
+    const plannerPage = await context.newPage();
+    try {
+      await plannerPage.goto(base + '/Bill/');
+      const dialog = plannerPage.locator('#installment-planner');
+      const apply = dialog.locator('button[type="submit"]');
+      await plannerPage.locator('.row-description').first().fill('INSTALLMENT DESCRIPTION');
+      await plannerPage.locator('#split-installments').click();
+      await dialog.locator('#planner-total').fill('10,000.01');
+      await dialog.locator('#planner-count').fill('2');
+      check(await dialog.locator('.planner-installment').count() === 2, 'planner adds one percentage field per installment');
+      await dialog.locator('#planner-rate-1').fill('50');
+      await dialog.locator('#planner-rate-2').fill('49');
+      await apply.click();
+      check(await dialog.isVisible() && await plannerPage.locator('.item-row').count() === 3,
+        'planner cannot replace the rows until percentages total 100%');
+      await dialog.locator('#planner-rate-2').fill('50');
+      check((await dialog.locator('output').allTextContents()).join('|').includes('5,000.01'),
+        'planner previews the rounded installments');
+      await apply.click();
+      check(!await dialog.isVisible() && await plannerPage.locator('.item-row').count() === 2,
+        'applying the planner fills the selected number of installments');
+      check(await plannerPage.locator('.amt-input').first().inputValue() === '5,000.01' &&
+        await plannerPage.locator('.amt-input').last().inputValue() === '5,000.00',
+        'rounded installments sum to the exact original total');
+      await plannerPage.reload();
+      check((await plannerPage.locator('#grand-total-footer').textContent()).includes('10,000.01') &&
+        await plannerPage.locator('.row-description').first().inputValue() === 'INSTALLMENT DESCRIPTION',
+        'calculated amounts and existing descriptions survive reload');
+      await plannerPage.locator('#split-installments').click();
+      await dialog.locator('#planner-total').fill('500');
+      plannerPage.once('dialog', prompt => prompt.dismiss());
+      await apply.click();
+      check(await dialog.isVisible() && await plannerPage.locator('.amt-input').first().inputValue() === '5,000.01',
+        'canceling replacement keeps existing amounts');
+    } finally {
+      await plannerPage.close();
+    }
+
+    const touchContext = await browser.newContext({ viewport: { width: 390, height: 850 }, hasTouch: true, isMobile: true });
+    try {
+      const touchPage = await touchContext.newPage();
+      await touchPage.goto(base + '/Bill/');
+      await touchPage.locator('.row-description').nth(1).fill('TOUCH-DRAG');
+      const handle = touchPage.locator('.btn-move-row').nth(1);
+      await handle.scrollIntoViewIfNeeded();
+      const start = await handle.boundingBox();
+      const target = await touchPage.locator('.item-row').first().boundingBox();
+      const cdp = await touchContext.newCDPSession(touchPage);
+      const x = Math.round(start.x + start.width / 2);
+      const startY = Math.round(start.y + start.height / 2);
+      const endY = Math.round(target.y + target.height / 3);
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y: startY }] });
+      for (let step = 1; step <= 8; step++) {
+        const y = Math.round(startY + (endY - startY) * step / 8);
+        await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y }] });
+      }
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      check(await touchPage.locator('.row-description').first().inputValue() === 'TOUCH-DRAG', 'touch drag works on the narrow BILL layout');
+    } finally {
+      await touchContext.close();
+    }
     await p.goto(base); await p.waitForURL('**/Qut/index.html');
     check(await p.locator('.section-nav,.draft-notice').count() === 0,'standalone nav and quotation draft notice are removed');
     check(await p.locator('.section-menu').isVisible() === false,'document menu is closed initially');
@@ -61,7 +200,7 @@ fs.mkdirSync(out, { recursive: true });
     await p.evaluate(()=>scrollTo(0,0)); await p.screenshot({path:path.join(out,'qut-desktop.png'),fullPage:true});
     await pdf('qut-th-short');
     await switchSection('bill');
-    check(await p.locator('#contract-total,.mode-input,#allocation-warning,[data-i18n=newDocument],.local-notice').count() === 0,'BILL returns to original controls with no contract/mode/warning/draft notice');
+    check(await p.locator('#contract-total,.mode-input,#allocation-warning,[data-i18n=newDocument],.local-notice').count() === 0,'BILL keeps the main editor free of extra calculation fields');
     check(await value('#companyName') === '', 'BILL keeps original blank company until preset is chosen');
     await p.locator('#company-menu-button').click(); await p.locator('.company-preset').click();
     check((await value('#companyName')).includes('ช่างเกล้า'),'BILL preset still fills from original company button');
@@ -129,6 +268,8 @@ fs.mkdirSync(out, { recursive: true });
     check(await legacy.locator('#project-name').inputValue() === 'PREVIOUS-DRAFT','previous BILL fields survive restoration');
     await legacy.locator('#languageToggle').click(); await legacy.reload();
     check(await legacy.locator('html').getAttribute('lang') === 'th','BILL language change is saved');
+    await legacy.locator('.btn-del').click();
+    check(await legacy.locator('.btn-del.is-armed').count() === 1, 'first delete click arms the row');
     await legacy.locator('.btn-del').click(); await legacy.reload();
     check(await legacy.locator('.item-row').count() === 0,'empty BILL stays empty after refresh');
     await legacy.close();

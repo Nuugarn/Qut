@@ -66,7 +66,7 @@ textarea { resize: vertical; }
 .col-number { width: 48px; }
 .col-percent { width: 95px; }
 .col-amount { width: 136px; }
-.col-action { width: 44px; }
+.col-action { width: 76px; }
 .tbl-head { background: var(--primary); color: #fff; }
 .tbl-head th { border-right: 1px solid #527966; border-bottom: 1px solid #78998a; padding: 11px 8px; font-size: 11px; font-weight: 700; text-align: right; white-space: nowrap; }
 .tbl-head th:first-child { text-align: center; }
@@ -102,6 +102,8 @@ textarea { resize: vertical; }
 .sig-name-n, .sig-date-pk { width: 100%; padding: 5px; border: 1px solid var(--border); border-radius: 5px; background: #fcfdfc; font-size: 12px; text-align: center; }
 .sig-date-lbl { font-size: 11px; color: var(--muted); margin-top: 10px; }
 .sig-date-pk { margin-top: 4px; max-width: 180px; }
+.sig-date-pk.is-empty { color: #788780; }
+.sig-date-pk.is-empty::-webkit-datetime-edit { color: #788780; }
 .sig-date-disp { font-size: 11px; color: var(--muted); min-height: 18px; margin-top: 4px; }
 .workspace-footer { text-align: center; padding-top: 22px; color: var(--muted); font-size: 12px; }
 .print-value { display: none; }
@@ -209,9 +211,29 @@ textarea { resize: vertical; }
   .footer-bottom-left { display: grid; grid-template-columns: 1.2fr 1fr; padding: 14px 0 18px; gap: 16px; }
   .footer-bottom-left .field { break-inside: avoid; }
   .footer-bottom-right { padding-top: 14px; break-inside: avoid; }
+  .footer-bottom-right.is-empty,
+  .sig-col.is-empty,
+  .sig-name-n.is-empty,
+  .sig-col:has(.sig-date-pk.is-empty) :is(.sig-date-lbl, .sig-date-disp) { display: none; }
+  .sig-col:nth-child(2) { grid-column: 2; }
   .sig-inline-title { margin-bottom: 10px; font-size: 10px; }
   .sig-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; padding: 0 18px; }
   .sig-col-label { font-size: 11px; }
   .sig-space { height: 45px; }
   .sig-date-lbl { margin-top: 5px; font-size: 10px; }
 }
+
+/* Installment planner */
+#installment-planner { width: min(440px, calc(100% - 24px)); max-height: calc(100dvh - 24px); padding: 20px; border: 1px solid var(--border); border-radius: 10px; color: var(--text); }
+#installment-planner::backdrop { background: #10241db0; }
+#installment-planner h2 { font-size: 18px; margin: 0 0 16px; }
+.planner-fields { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 14px; }
+.planner-fields label { display: grid; gap: 4px; min-width: 0; }
+#installment-planner input { width: 100%; min-height: 40px; padding: 7px 9px; border: 1px solid var(--border); border-radius: 6px; background: #fff; font: inherit; }
+#planner-rates { display: grid; gap: 6px; }
+.planner-installment { display: grid; grid-template-columns: minmax(0, 1fr) minmax(60px, 85px) minmax(0, 1fr); align-items: center; gap: 8px; }
+.planner-installment output { text-align: right; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+#planner-status { min-height: 1.5em; margin: 12px 0; color: var(--muted); }
+.planner-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.planner-actions button { min-height: 40px; padding: 7px 12px; border: 1px solid var(--border); border-radius: 7px; background: #fff; color: var(--primary); font: inherit; }
+.planner-actions button[type="submit"] { background: var(--primary); color: #fff; }
